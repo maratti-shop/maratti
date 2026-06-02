@@ -689,8 +689,8 @@ function openPVZ(type){
   let url = '';
   if(type === 'ozon'){
     url = city
-      ? 'https://www.ozon.ru/my/orderlist/pickup/?city='+encodeURIComponent(city)
-      : 'https://www.ozon.ru/my/orderlist/pickup/';
+      ? 'https://www.ozon.ru/pickup-points/?city='+encodeURIComponent(city)
+      : 'https://www.ozon.ru/pickup-points/';
   } else {
     url = city
       ? 'https://www.cdek.ru/ru/offices/?city='+encodeURIComponent(city)
@@ -702,15 +702,35 @@ function openPVZ(type){
 
 // ── PHONE FORMAT ──
 function formatPhone(input){
+  // Оставляем только цифры
   let v = input.value.replace(/[^0-9]/g, '');
+  // 8 заменяем на 7
   if(v.startsWith('8')) v = '7'+v.slice(1);
-  if(v.startsWith('7') && v.length > 0){
-    let r = '+7';
-    if(v.length > 1) r += ' ('+v.slice(1,4);
-    if(v.length > 4) r += ') '+v.slice(4,7);
-    if(v.length > 7) r += '-'+v.slice(7,9);
-    if(v.length > 9) r += '-'+v.slice(9,11);
-    input.value = r;
+  if(!v.startsWith('7') && v.length > 0) v = '7'+v;
+  // Обрезаем до 11 цифр максимум
+  v = v.slice(0, 11);
+  // Форматируем
+  let r = '';
+  if(v.length > 0) r = '+7';
+  if(v.length > 1) r += ' ('+v.slice(1, Math.min(4, v.length));
+  if(v.length >= 4) r += ')';
+  if(v.length > 4) r += ' '+v.slice(4, Math.min(7, v.length));
+  if(v.length > 7) r += '-'+v.slice(7, Math.min(9, v.length));
+  if(v.length > 9) r += '-'+v.slice(9, 11);
+  input.value = r;
+  // Показываем ошибку если номер неполный
+  const digits = v.length;
+  const hint = input.nextElementSibling;
+  if(hint && hint.classList.contains('fhint')){
+    if(digits > 0 && digits < 11){
+      hint.textContent = '⚠️ Введите все цифры номера ('+digits+'/11)';
+      hint.style.color = 'var(--red)';
+    } else if(digits === 11){
+      hint.textContent = '✅ Номер введён корректно';
+      hint.style.color = 'var(--green-b)';
+    } else {
+      hint.textContent = '';
+    }
   }
 }
 
