@@ -287,17 +287,24 @@
         <div class="del-dot"></div>
         <div><div class="del-name">📦 Пункт выдачи СДЭК</div><div class="del-desc">Укажите адрес ближайшего ПВЗ</div></div>
       </div>
-      <div class="del-opt" id="del-courier" onclick="selDel('courier')">
-        <div class="del-dot"></div>
-        <div><div class="del-name">🚚 Курьер до двери</div><div class="del-desc">Доставка по вашему адресу</div></div>
-      </div>
+
 
       <div class="fo-sec">Адрес</div>
       <div class="fg"><label class="fl">Город *</label><input class="fi" id="f-city" placeholder="Москва" maxlength="100"></div>
       <div class="fg">
         <label class="fl" id="f-addr-lbl">Адрес ПВЗ OZON *</label>
         <input class="fi" id="f-addr" placeholder="ул. Ленина, 15, ПВЗ №123" maxlength="200">
-        <div class="fhint" id="f-addr-hint">💡 Найди ПВЗ на ozon.ru и скопируй адрес</div>
+        <div class="fhint" id="f-addr-hint">💡 Найди ближайший ПВЗ и скопируй адрес</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button type="button" onclick="openPVZ('ozon')"
+            style="flex:1;padding:10px 8px;background:#005bff;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer">
+            📦 Найти ПВЗ OZON
+          </button>
+          <button type="button" onclick="openPVZ('cdek')"
+            style="flex:1;padding:10px 8px;background:#00b33c;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer">
+            📦 Найти ПВЗ СДЭК
+          </button>
+        </div>
       </div>
 
       <div class="fo-sec">Комментарий</div>
@@ -497,13 +504,16 @@ function closeFo(){ document.getElementById('fo').classList.remove('on'); docume
 
 function selDel(type){
   selDel_=type;
-  ['ozon','cdek','courier'].forEach(t=>document.getElementById('del-'+t).classList.toggle('on',t===type));
+  ['ozon','cdek'].forEach(t=>document.getElementById('del-'+t).classList.toggle('on',t===type));
   const lbl = document.getElementById('f-addr-lbl');
-  const hint = document.getElementById('f-addr-hint');
   const addr = document.getElementById('f-addr');
-  if(type==='courier'){ lbl.textContent='Адрес доставки *'; addr.placeholder='ул. Ленина, д.15, кв.42'; hint.textContent='🚚 Полный адрес для курьера'; }
-  else if(type==='cdek'){ lbl.textContent='Адрес ПВЗ СДЭК *'; addr.placeholder='ул. Пушкина, 10 (СДЭК)'; hint.textContent='💡 Найди ПВЗ на cdek.ru и скопируй адрес'; }
-  else { lbl.textContent='Адрес ПВЗ OZON *'; addr.placeholder='ул. Ленина, 15, ПВЗ №123'; hint.textContent='💡 Найди ПВЗ на ozon.ru и скопируй адрес'; }
+  if(type==='cdek'){
+    lbl.textContent='Адрес ПВЗ СДЭК *';
+    addr.placeholder='ул. Пушкина, 10 (СДЭК)';
+  } else {
+    lbl.textContent='Адрес ПВЗ OZON *';
+    addr.placeholder='ул. Ленина, 15, ПВЗ №123';
+  }
 }
 
 async function submitOrder(){
@@ -516,8 +526,13 @@ async function submitOrder(){
   const comment = document.getElementById('f-comment').value.trim();
   if(!name){ tg.showAlert('Введите имя'); return; }
   if(!last){ tg.showAlert('Введите фамилию'); return; }
+  // Валидация российского номера
+  const phoneClean = phone.replace(/[^0-9]/g, '');
   if(!phone){ tg.showAlert('Введите телефон'); return; }
+  if(phoneClean.length !== 11 || !['7','8'].includes(phoneClean[0])){ tg.showAlert('Введите корректный российский номер\nПример: +7 (999) 999-99-99'); return; }
+  const ozonClean = ozon.replace(/[^0-9]/g, '');
   if(!ozon){ tg.showAlert('Введите телефон OZON'); return; }
+  if(ozonClean.length !== 11 || !['7','8'].includes(ozonClean[0])){ tg.showAlert('Введите корректный номер OZON\nПример: +7 (999) 999-99-99'); return; }
   if(!city){ tg.showAlert('Введите город'); return; }
   if(!addr){ tg.showAlert('Введите адрес'); return; }
 
@@ -593,9 +608,16 @@ async function submitOrder(){
   appliedPromo=null;
   document.getElementById('promo-input').value='';
   const pr=document.getElementById('promo-result'); if(pr){ pr.style.display='none'; }
+  const cart_items = cart.map(i=>`• ${i.name} (${i.color||''}), р.${i.size} — ${fmt(i.price)} ₽`).join('\n');
   cart=[]; updateBadges(); renderCart(); closeFo(); goPage('home');
   btn.disabled=false; btn.textContent='✅ Подтвердить заказ';
-  setTimeout(()=>tg.showAlert('✅ Заказ оформлен!\n\nМенеджер MARATTI свяжется с вами по номеру '+phone+' в ближайшее время.'),300);
+  const confirmMsg =
+    '✅ Заказ #'+String(orderId).slice(-6)+' оформлен!\n\n'+
+    cart_items+'\n\n'+
+    '💳 Итого: '+fmt(total)+' ₽\n\n'+
+    '📞 Менеджер свяжется с вами по номеру '+phone+' для подтверждения и оплаты.\n\n'+
+    'С уважением, MARATTI 🖤';
+  setTimeout(()=>tg.showAlert(confirmMsg), 300);
 }
 
 // ── NAVIGATION ──
@@ -658,6 +680,37 @@ function updateCartTotal(){
       `<div class="f-sum-item"><span>Доставка</span><span>${del===0?'Бесплатно':fmt(del)+' ₽'}</span></div>`+
       (disc?`<div class="f-sum-item" style="color:var(--green-b)"><span>Промокод ${appliedPromo.code}</span><span>−${fmt(disc)} ₽</span></div>`:'')+
       `<div class="f-sum-total">Итого: ${fmt(total)} ₽</div>`;
+  }
+}
+
+// ── PVZ MAP ──
+function openPVZ(type){
+  const city = (document.getElementById('f-city').value||'').trim();
+  let url = '';
+  if(type === 'ozon'){
+    url = city
+      ? 'https://www.ozon.ru/my/orderlist/pickup/?city='+encodeURIComponent(city)
+      : 'https://www.ozon.ru/my/orderlist/pickup/';
+  } else {
+    url = city
+      ? 'https://www.cdek.ru/ru/offices/?city='+encodeURIComponent(city)
+      : 'https://www.cdek.ru/ru/offices/';
+  }
+  if(tg.openLink) tg.openLink(url);
+  else window.open(url, '_blank');
+}
+
+// ── PHONE FORMAT ──
+function formatPhone(input){
+  let v = input.value.replace(/[^0-9]/g, '');
+  if(v.startsWith('8')) v = '7'+v.slice(1);
+  if(v.startsWith('7') && v.length > 0){
+    let r = '+7';
+    if(v.length > 1) r += ' ('+v.slice(1,4);
+    if(v.length > 4) r += ') '+v.slice(4,7);
+    if(v.length > 7) r += '-'+v.slice(7,9);
+    if(v.length > 9) r += '-'+v.slice(9,11);
+    input.value = r;
   }
 }
 
