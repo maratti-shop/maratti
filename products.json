@@ -50,5 +50,31 @@
     "reviews": 0,
     "active": true,
     "id": 1780439232221
+  },
+  {
+    "name": "Кеды натуральная кожа",
+    "cat": "sneakers",
+    "catName": "Кеды",
+    "color": "Серо-белый",
+    "material": "Натуральная кожа",
+    "price": 5200,
+    "old": 17800,
+    "wb": 7450,
+    "disc": 71,
+    "sizes": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45
+    ],
+    "art": "893498480",
+    "photo": "https://basket-39.wbcontent.net/vol8934/part893498/893498480/images/big https://basket-39.wbcontent.net/vol8934/part893498/893498480/images/big/3.webp/2.webp",
+    "desc": "",
+    "rating": 5,
+    "reviews": 0,
+    "active": true,
+    "id": 1780439659306
   }
 ]
