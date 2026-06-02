@@ -243,7 +243,11 @@
             <div class="main-title">Товары</div>
             <div class="main-sub" id="products-count">9 товаров в каталоге</div>
           </div>
-          <button class="btn btn-primary" onclick="openAddProduct()">+ Добавить товар</button>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-ghost" onclick="loadFromGitHub()">🔄 Обновить</button>
+            <button class="btn btn-primary" onclick="openAddProduct()">+ Добавить товар</button>
+            <button class="btn btn-primary" style="background:linear-gradient(135deg,#7a4a1a,#c9a84c);border-color:#c9a84c;color:#0a0f0a" onclick="saveToGitHub()">🚀 Сохранить на сайт</button>
+          </div>
         </div>
         <div class="main-body">
           <div class="table-wrap">
@@ -310,6 +314,11 @@
             <div class="form-group">
               <label class="form-label">Стоимость доставки (₽)</label>
               <input class="form-input" value="350" id="s-delivery-cost" type="number">
+            </div>
+            <div class="form-group">
+              <label class="form-label">GitHub Token (для синхронизации товаров)</label>
+              <input class="form-input" type="password" id="s-token" placeholder="ghp_...">
+              <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Хранится только в твоём браузере · никто другой не видит</div>
             </div>
             <button class="btn btn-primary" onclick="saveSettings()">Сохранить</button>
           </div>
@@ -423,8 +432,13 @@
 <div class="notif" id="notif"></div>
 
 <script>
-  // === ПАРОЛЬ (можешь поменять) ===
+  // === НАСТРОЙКИ ===
   const ADMIN_PASSWORD = 'maratti2006';
+  const GITHUB_OWNER = 'maratti-shop';
+  const GITHUB_REPO = 'maratti';
+  const GITHUB_FILE = 'products.json';
+  // Токен хранится только в браузере, не в коде
+  function getToken(){ return localStorage.getItem('gh_token')||''; }
 
   // === ДАННЫЕ ===
   let products = JSON.parse(localStorage.getItem('maratti_products') || 'null') || [
@@ -441,7 +455,40 @@
 
   let orders = JSON.parse(localStorage.getItem('maratti_orders') || '[]');
 
-  function saveData(){ localStorage.setItem('maratti_products', JSON.stringify(products)); }
+  function saveData(){
+    localStorage.setItem('maratti_products', JSON.stringify(products));
+  }
+
+  async function saveToGitHub(){
+    showNotif('⏳ Сохраняю на сайт...');
+    try {
+      // Получаем текущий SHA файла
+      const getRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`,{
+        headers:{'Authorization':'token '+getToken(),'Accept':'application/vnd.github.v3+json'}
+      });
+      const fileData = await getRes.json();
+      const sha = fileData.sha;
+
+      // Кодируем данные в base64
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(products, null, 2))));
+
+      // Обновляем файл
+      const putRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`,{
+        method:'PUT',
+        headers:{'Authorization':'token '+getToken(),'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+        body: JSON.stringify({ message:'Обновление товаров через админку', content, sha })
+      });
+
+      if(putRes.ok){
+        showNotif('✅ Сохранено! Сайт обновится через ~1 мин');
+      } else {
+        const err = await putRes.json();
+        showNotif('❌ Ошибка: '+err.message);
+      }
+    } catch(e){
+      showNotif('❌ Ошибка сети: '+e.message);
+    }
+  }
   function saveOrders(){ localStorage.setItem('maratti_orders', JSON.stringify(orders)); }
   function fmt(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,' '); }
 
@@ -537,7 +584,7 @@
 
   function toggleProduct(id, active){
     const p = products.find(p=>p.id===id);
-    if(p){ p.active=active; saveData(); showNotif(active?'✅ Товар показан':'👁 Товар скрыт'); }
+    if(p){ p.active=active; saveData(); saveToGitHub(); showNotif(active?'✅ Товар показан':'👁 Товар скрыт'); }
   }
 
   function openAddProduct(){
@@ -602,14 +649,14 @@
       products.push(data);
       showNotif('✅ Товар добавлен!');
     }
-    saveData(); closeProductModal(); renderProducts();
+    saveData(); closeProductModal(); renderProducts(); saveToGitHub();
     document.getElementById('products-count').textContent = products.length+' товаров в каталоге';
   }
 
   function deleteProduct(id){
     if(!confirm('Удалить товар?')) return;
     products = products.filter(p=>p.id!==id);
-    saveData(); renderProducts(); showNotif('🗑 Товар удалён');
+    saveData(); renderProducts(); saveToGitHub();
   }
 
   function closeProductModal(){ document.getElementById('product-modal').classList.remove('show'); }
@@ -681,7 +728,11 @@
   function closeOrderModal(){ document.getElementById('order-modal').classList.remove('show'); }
 
   // === SETTINGS ===
-  function saveSettings(){ showNotif('✅ Настройки сохранены!'); }
+  function saveSettings(){
+    const token = document.getElementById('s-token').value.trim();
+    if(token) localStorage.setItem('gh_token', token);
+    showNotif('✅ Настройки сохранены!');
+  }
   function changePassword(){
     const pwd = document.getElementById('new-pwd').value;
     if(pwd.length<4){ alert('Минимум 4 символа'); return; }
@@ -697,7 +748,27 @@
     setTimeout(()=>el.style.display='none', 2500);
   }
 
-  function renderAll(){ renderDashboard(); renderProducts(); }
+  async function loadFromGitHub(){
+    showNotif('⏳ Загружаю товары...');
+    try {
+      const res = await fetch(`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${GITHUB_FILE}?t=${Date.now()}`);
+      const data = await res.json();
+      products = data;
+      saveData();
+      renderProducts();
+      showNotif('✅ Товары загружены с сайта!');
+    } catch(e){
+      showNotif('❌ Ошибка загрузки');
+    }
+  }
+
+  function renderAll(){
+    renderDashboard(); renderProducts();
+    // Показываем сохранённый токен в настройках
+    const t = getToken();
+    const tokenField = document.getElementById('s-token');
+    if(tokenField && t) tokenField.value = t;
+  }
 
   // Auto-check login
   if(localStorage.getItem('maratti_pwd')){
