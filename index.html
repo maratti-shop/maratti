@@ -596,16 +596,60 @@ ${comment?'💬 Комментарий: '+comment:''}
 
     const BOT_TOKEN = '8737124576:AAF45XAKXziRVl2sSSgHuU-o6Rtaio33JBs';
     const OWNER_ID = '1258838821';
+    const GITHUB_OWNER = 'maratti-shop';
+    const GITHUB_REPO = 'maratti';
+    const orderId = Date.now();
+
+    // Формируем объект заказа
+    const orderObj = {
+      id: orderId,
+      num: '#'+orderId.toString().slice(-6),
+      date: new Date().toLocaleString('ru-RU'),
+      status: 'new',
+      name, lastname, phone, ozonPhone,
+      tgUsername, tgName, tgId,
+      deliveryType: {ozon:'ПВЗ OZON',cdek:'ПВЗ СДЭК',courier:'Курьер'}[selectedDelivery],
+      city, address, comment,
+      items: cart.map(i=>({art:i.art, name:i.name, color:i.color, size:i.size, price:i.price})),
+      sum, deliveryCost, total
+    };
 
     try {
+      // 1. Отправляем уведомление в Telegram
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ chat_id: OWNER_ID, text: msg, parse_mode: 'HTML' })
+        body: JSON.stringify({ chat_id: OWNER_ID, text: msg })
       });
+
+      // 2. Сохраняем заказ в orders.json на GitHub
+      const ghToken = localStorage.getItem('gh_token')||'';
+      if(ghToken){
+        // Читаем текущие заказы
+        const getRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/orders.json`,{
+          headers:{'Authorization':'token '+ghToken,'Accept':'application/vnd.github.v3+json'}
+        });
+        const fileData = await getRes.json();
+        let currentOrders = [];
+        try { currentOrders = JSON.parse(atob(fileData.content.replace(/
+/g,''))); } catch(e){}
+        currentOrders.push(orderObj);
+
+        // Обновляем файл
+        await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/orders.json`,{
+          method:'PUT',
+          headers:{'Authorization':'token '+ghToken,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+          body: JSON.stringify({
+            message:'Новый заказ '+orderObj.num,
+            content: btoa(unescape(encodeURIComponent(JSON.stringify(currentOrders, null, 2)))),
+            sha: fileData.sha
+          })
+        });
+      }
+
       // Сохраняем данные клиента локально
-      const clientData = { name, lastname, phone, city, address, tgId, tgUsername };
-      localStorage.setItem('maratti_client', JSON.stringify(clientData));
+      localStorage.setItem('maratti_client', JSON.stringify({name, lastname, phone, city, address, tgId, tgUsername}));
+      // Сохраняем токен если он есть в клиенте
     } catch(e){ console.log('err',e); }
 
     cart = []; updateBadges(); renderCart();
