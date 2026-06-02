@@ -526,13 +526,10 @@ async function submitOrder(){
   const comment = document.getElementById('f-comment').value.trim();
   if(!name){ tg.showAlert('Введите имя'); return; }
   if(!last){ tg.showAlert('Введите фамилию'); return; }
-  // Валидация российского номера
-  const phoneClean = phone.replace(/[^0-9]/g, '');
-  if(!phone){ tg.showAlert('Введите телефон'); return; }
-  if(phoneClean.length !== 11 || !['7','8'].includes(phoneClean[0])){ tg.showAlert('Введите корректный российский номер\nПример: +7 (999) 999-99-99'); return; }
-  const ozonClean = ozon.replace(/[^0-9]/g, '');
-  if(!ozon){ tg.showAlert('Введите телефон OZON'); return; }
-  if(ozonClean.length !== 11 || !['7','8'].includes(ozonClean[0])){ tg.showAlert('Введите корректный номер OZON\nПример: +7 (999) 999-99-99'); return; }
+  const phoneDigits = phone.replace(/\D/g,'');
+  if(phoneDigits.length < 11){ tg.showAlert('Введите полный номер телефона\n+7 (XXX) XXX-XX-XX'); return; }
+  const ozonDigits = ozon.replace(/\D/g,'');
+  if(ozonDigits.length < 11){ tg.showAlert('Введите полный номер телефона OZON\n+7 (XXX) XXX-XX-XX'); return; }
   if(!city){ tg.showAlert('Введите город'); return; }
   if(!addr){ tg.showAlert('Введите адрес'); return; }
 
@@ -689,8 +686,8 @@ function openPVZ(type){
   let url = '';
   if(type === 'ozon'){
     url = city
-      ? 'https://www.ozon.ru/pickup-points/?city='+encodeURIComponent(city)
-      : 'https://www.ozon.ru/pickup-points/';
+      ? 'https://www.ozon.ru/geo/'
+      : 'https://www.ozon.ru/geo/';
   } else {
     url = city
       ? 'https://www.cdek.ru/ru/offices/?city='+encodeURIComponent(city)
@@ -702,34 +699,37 @@ function openPVZ(type){
 
 // ── PHONE FORMAT ──
 function formatPhone(input){
-  // Оставляем только цифры
-  let v = input.value.replace(/[^0-9]/g, '');
-  // 8 заменяем на 7
-  if(v.startsWith('8')) v = '7'+v.slice(1);
-  if(!v.startsWith('7') && v.length > 0) v = '7'+v;
-  // Обрезаем до 11 цифр максимум
-  v = v.slice(0, 11);
-  // Форматируем
-  let r = '';
-  if(v.length > 0) r = '+7';
-  if(v.length > 1) r += ' ('+v.slice(1, Math.min(4, v.length));
-  if(v.length >= 4) r += ')';
-  if(v.length > 4) r += ' '+v.slice(4, Math.min(7, v.length));
-  if(v.length > 7) r += '-'+v.slice(7, Math.min(9, v.length));
-  if(v.length > 9) r += '-'+v.slice(9, 11);
-  input.value = r;
-  // Показываем ошибку если номер неполный
-  const digits = v.length;
+  // Сохраняем позицию курсора
+  const pos = input.selectionStart;
+  // Берём только цифры
+  let digits = input.value.replace(/\D/g, '');
+  // Заменяем 8 на 7
+  if(digits.length > 0 && digits[0] === '8') digits = '7' + digits.slice(1);
+  // Если начинается не с 7 — добавляем
+  if(digits.length > 0 && digits[0] !== '7') digits = '7' + digits;
+  // Обрезаем до 11 цифр
+  digits = digits.slice(0, 11);
+  // Форматируем в +7 (XXX) XXX-XX-XX
+  let formatted = '';
+  if(digits.length >= 1) formatted = '+7';
+  if(digits.length >= 2) formatted += ' (' + digits.slice(1, 4);
+  if(digits.length >= 4) formatted += ')';
+  if(digits.length >= 5) formatted += ' ' + digits.slice(4, 7);
+  if(digits.length >= 8) formatted += '-' + digits.slice(7, 9);
+  if(digits.length >= 10) formatted += '-' + digits.slice(9, 11);
+  input.value = formatted;
+  // Подсказка под полем
   const hint = input.nextElementSibling;
-  if(hint && hint.classList.contains('fhint')){
-    if(digits > 0 && digits < 11){
-      hint.textContent = '⚠️ Введите все цифры номера ('+digits+'/11)';
+  if(hint){
+    if(digits.length > 0 && digits.length < 11){
+      hint.textContent = '⚠️ Ещё ' + (11 - digits.length) + ' цифр';
       hint.style.color = 'var(--red)';
-    } else if(digits === 11){
-      hint.textContent = '✅ Номер введён корректно';
+    } else if(digits.length === 11){
+      hint.textContent = '✅ Номер введён';
       hint.style.color = 'var(--green-b)';
     } else {
       hint.textContent = '';
+      hint.style.color = '';
     }
   }
 }
