@@ -339,17 +339,15 @@
   const tg = window.Telegram?.WebApp || { ready:()=>{}, expand:()=>{}, initDataUnsafe:{}, sendData:(d)=>alert('Заказ:\n'+d) };
   tg.ready(); tg.expand();
 
-  const PRODUCTS = [
-    {id:1,art:'844798824',name:'Лоферы летние замшевые',cat:'loafers',catName:'Лоферы · Замша',color:'Бежевый',price:6600,old:16000,disc:59,wb:7105,sizes:[40,41,42,43,44,45],rating:4.8,reviews:636,desc:'Летние лоферы из натуральной замши. Мягкая подошва, удобная колодка. Идеальны для офиса и прогулок.',photo:''},
-    {id:2,art:'844798823',name:'Лоферы летние замшевые',cat:'loafers',catName:'Лоферы · Замша',color:'Коричневый',price:6730,old:16000,disc:58,wb:7239,sizes:[40,41,42,43,44,45],rating:4.8,reviews:636,desc:'Замшевые лоферы насыщенного коричневого цвета. Ручная прошивка, премиальная замша.',photo:''},
-    {id:3,art:'886482432',name:'Лоферы натуральная кожа',cat:'loafers',catName:'Лоферы · Кожа',color:'Коричневый',price:6640,old:14450,disc:54,wb:7143,sizes:[40,41,42,43,44,45],rating:4.8,reviews:2096,desc:'Кожаные лоферы с лёгкой подошвой. Премиум-кожа российского производителя.',photo:''},
-    {id:4,art:'527858012',name:'Туфли натуральная кожа',cat:'shoes',catName:'Туфли · Кожа',color:'Бордо',price:6420,old:15350,disc:58,wb:6908,sizes:[40,41,42,43,44,45],rating:4.7,reviews:750,desc:'Классические туфли дерби из натуральной кожи бордового оттенка. Для делового стиля.',photo:''},
-    {id:5,art:'784103081',name:'Лоферы кожаные',cat:'loafers',catName:'Лоферы · Кожа',color:'Чёрный',price:6640,old:14450,disc:54,wb:7143,sizes:[40,41,42,43,44,45],rating:4.8,reviews:1200,desc:'Чёрные кожаные лоферы с удобной колодкой. Плотно прилегает к ноге.',photo:''},
-    {id:6,art:'358420379',name:'Лоферы MARATTI Premium',cat:'loafers',catName:'Лоферы Premium',color:'Чёрный',price:6700,old:15350,disc:56,wb:7202,sizes:[40,41,42,43,44,45],rating:4.8,reviews:950,desc:'Премиальная линейка MARATTI. Акцент на качестве отделки и материалов.',photo:''},
-    {id:7,art:'362291574',name:'Лоферы натуральная кожа',cat:'loafers',catName:'Лоферы · Кожа',color:'Чёрный',price:6640,old:14450,disc:54,wb:7143,sizes:[40,41,42,43,44,45],rating:4.7,reviews:480,desc:'Классические чёрные лоферы. Универсальная пара для любого случая.',photo:''},
-    {id:8,art:'527813688',name:'Туфли дерби',cat:'shoes',catName:'Туфли · Кожа',color:'Чёрный',price:6420,old:15350,disc:58,wb:6908,sizes:[40,41,42,43,44,45],rating:4.8,reviews:1100,desc:'Чёрные туфли дерби из натуральной кожи. Дышащий материал, ручная прошивка.',photo:''},
-    {id:9,art:'401102751',name:'Кеды MARATTI Premium',cat:'sneakers',catName:'Кеды Premium',color:'Серый',price:6740,old:9500,disc:29,wb:7247,sizes:[40,41,42,43,44,45],rating:4.7,reviews:420,desc:'Премиум-кеды из натуральной замши. Серый верх, контрастная подошва.',photo:''}
-  ];
+  let PRODUCTS = [];
+
+  async function loadProducts(){
+    try {
+      const res = await fetch('products.json?t='+Date.now());
+      PRODUCTS = (await res.json()).filter(p=>p.active!==false);
+    } catch(e){ PRODUCTS=[]; }
+    renderCats(); renderProducts(); updateBadges();
+  }
 
   const CATS = [{id:'all',name:'Все'},{id:'loafers',name:'Лоферы'},{id:'shoes',name:'Туфли'},{id:'sneakers',name:'Кеды'}];
 
@@ -649,7 +647,7 @@ ${comment?'💬 Комментарий: '+comment:''}
   }
 
   // INIT
-  renderCats(); renderProducts(); updateBadges();
+  loadProducts();
   const u = tg.initDataUnsafe?.user;
   if(u) document.getElementById('user-name').textContent = u.first_name||'Гость';
 </script>
