@@ -146,6 +146,36 @@
 
     /* GOLD DIVIDER */
     .gold-line { height: 1px; background: linear-gradient(90deg, transparent, var(--gold-dim), transparent); margin: 4px 16px; }
+
+    /* CHECKOUT FORM */
+    .form-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 300; display: none; align-items: flex-end; }
+    .form-overlay.show { display: flex; }
+    .form-sheet { background: var(--surface); width: 100%; max-height: 92vh; border-radius: 20px 20px 0 0; overflow-y: auto; animation: slideUp 0.25s ease; border-top: 2px solid var(--gold-dim); padding-bottom: 20px; }
+    .form-header { padding: 18px 18px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+    .form-title { font-family: Georgia, serif; font-size: 18px; font-weight: 700; color: var(--gold); }
+    .form-close { width: 32px; height: 32px; background: var(--card); border: 1px solid var(--border2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text); cursor: pointer; }
+    .form-body { padding: 16px 18px; }
+    .form-section { font-family: Georgia, serif; font-size: 13px; font-weight: 700; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; margin: 18px 0 10px; }
+    .form-section:first-child { margin-top: 0; }
+    .form-group { margin-bottom: 12px; }
+    .form-label { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; display: block; }
+    .form-input { width: 100%; background: var(--card); border: 1px solid var(--border2); border-radius: 10px; padding: 12px 14px; font-size: 14px; color: var(--text); outline: none; font-family: inherit; }
+    .form-input:focus { border-color: var(--green-light); }
+    .form-input::placeholder { color: var(--text-muted); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+    .form-summary { background: var(--card); border: 1px solid var(--border2); border-radius: 10px; padding: 12px; margin-bottom: 16px; }
+    .form-summary-item { font-size: 12px; color: var(--text-soft); padding: 4px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+    .form-summary-item:last-child { border-bottom: none; }
+    .form-summary-total { font-family: Georgia, serif; font-size: 16px; font-weight: 700; color: var(--gold); text-align: right; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border2); }
+    .btn-submit { width: 100%; background: linear-gradient(135deg, #1a4a1a, #2d7a2d); color: var(--gold); border: 1px solid var(--gold-dim); padding: 16px; font-family: Georgia, serif; font-size: 16px; font-weight: 700; cursor: pointer; border-radius: 12px; letter-spacing: 1px; margin-top: 8px; }
+    .btn-submit:active { opacity: 0.8; }
+    .delivery-opt { background: var(--card); border: 1px solid var(--border2); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; display: flex; align-items: flex-start; gap: 10px; transition: all 0.15s; }
+    .delivery-opt.active { border-color: var(--gold-dim); background: var(--green); }
+    .delivery-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border2); flex-shrink: 0; margin-top: 2px; }
+    .delivery-opt.active .delivery-dot { border-color: var(--gold); background: var(--gold); }
+    .delivery-opt-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .delivery-opt-desc { font-size: 11px; color: var(--text-muted); }
   </style>
 </head>
 <body>
@@ -220,7 +250,7 @@
   <div class="info-block">
     <div class="info-row" style="cursor:pointer"><span class="info-label">🚚 Доставка и оплата</span><span class="info-val">›</span></div>
     <div class="info-row" style="cursor:pointer"><span class="info-label">🛡 Гарантия</span><span class="info-val">›</span></div>
-    <div class="info-row" style="cursor:pointer"><span class="info-label">📞 +7 (938) 780-99-90</span><span class="info-val">›</span></div>
+    <div class="info-row" style="cursor:pointer" onclick="tg.openLink('https://t.me/+79894762089')"><span class="info-label">📞 +7 (989) 476-20-89</span><span class="info-val">›</span></div>
   </div>
   <div style="text-align:center;padding:28px;color:var(--text-muted)">
     <div style="font-family:Georgia,serif;font-size:18px;letter-spacing:4px;color:var(--gold);margin-bottom:6px">MARATTI</div>
@@ -240,6 +270,69 @@
 <!-- MODAL -->
 <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- CHECKOUT FORM -->
+<div class="form-overlay" id="form-overlay" onclick="if(event.target===this)closeForm()">
+  <div class="form-sheet">
+    <div class="form-header">
+      <div class="form-title">Оформление заказа</div>
+      <div class="form-close" onclick="closeForm()">×</div>
+    </div>
+    <div class="form-body">
+      <div class="form-section">Ваш заказ</div>
+      <div class="form-summary" id="form-summary"></div>
+      <div class="form-section">Личные данные</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Имя *</label>
+          <input class="form-input" id="f-name" placeholder="Иван" maxlength="50">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Фамилия *</label>
+          <input class="form-input" id="f-lastname" placeholder="Иванов" maxlength="50">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Номер телефона *</label>
+        <input class="form-input" id="f-phone" placeholder="+7 (999) 999-99-99" type="tel" maxlength="20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Номер телефона привязанный к OZON *</label>
+        <input class="form-input" id="f-ozon-phone" placeholder="+7 (999) 999-99-99" type="tel" maxlength="20">
+        <div class="form-hint">📦 Нужен чтобы курьер мог найти ваш заказ в пункте выдачи</div>
+      </div>
+      <div class="form-section">Способ доставки</div>
+      <div class="delivery-opt active" id="del-ozon" onclick="selectDelivery('ozon')">
+        <div class="delivery-dot"></div>
+        <div><div class="delivery-opt-name">📦 Пункт выдачи OZON</div><div class="delivery-opt-desc">Укажите адрес ближайшего ПВЗ OZON</div></div>
+      </div>
+      <div class="delivery-opt" id="del-cdek" onclick="selectDelivery('cdek')">
+        <div class="delivery-dot"></div>
+        <div><div class="delivery-opt-name">📦 Пункт выдачи СДЭК</div><div class="delivery-opt-desc">Укажите адрес ближайшего ПВЗ СДЭК</div></div>
+      </div>
+      <div class="delivery-opt" id="del-courier" onclick="selectDelivery('courier')">
+        <div class="delivery-dot"></div>
+        <div><div class="delivery-opt-name">🚚 Курьер до двери</div><div class="delivery-opt-desc">Доставка по вашему адресу</div></div>
+      </div>
+      <div class="form-section">Адрес доставки</div>
+      <div class="form-group">
+        <label class="form-label">Город *</label>
+        <input class="form-input" id="f-city" placeholder="Москва" maxlength="100">
+      </div>
+      <div class="form-group" id="pvz-group">
+        <label class="form-label">Адрес пункта выдачи *</label>
+        <input class="form-input" id="f-address" placeholder="ул. Ленина, 15, ПВЗ №123" maxlength="200">
+        <div class="form-hint">💡 Найди ближайший ПВЗ на сайте OZON и скопируй адрес</div>
+      </div>
+      <div class="form-section">Комментарий</div>
+      <div class="form-group">
+        <label class="form-label">Дополнительно (необязательно)</label>
+        <input class="form-input" id="f-comment" placeholder="Позвонить перед доставкой..." maxlength="300">
+      </div>
+      <button class="btn-submit" onclick="submitOrder()">✅ Подтвердить заказ</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -396,11 +489,139 @@
     document.getElementById('ct-total').textContent = fmt(sum+delivery)+' ₽';
   }
 
+  // CHECKOUT — открываем форму
   function checkout(){
     if(!cart.length){ alert('Корзина пуста!'); return; }
-    const order = { items: cart.map(i=>({art:i.art,name:i.name,size:i.size,price:i.price})), total: cart.reduce((s,i)=>s+i.price,0) };
-    if(tg.sendData){ tg.sendData(JSON.stringify(order)); }
-    else { alert('Заказ оформлен! (демо)\n\nСумма: '+fmt(order.total)+' ₽\n\nС вами свяжется менеджер MARATTI.'); }
+    // Заполняем сводку заказа в форме
+    const sum = cart.reduce((s,i)=>s+i.price,0);
+    const delivery = sum >= 5000 ? 0 : 350;
+    const total = sum + delivery;
+    const summaryEl = document.getElementById('form-summary');
+    summaryEl.innerHTML =
+      cart.map(i=>`<div class="form-summary-item"><span>${i.name} р.${i.size}</span><span>${fmt(i.price)} ₽</span></div>`).join('') +
+      `<div class="form-summary-item"><span>Доставка</span><span>${delivery===0?'Бесплатно':fmt(delivery)+' ₽'}</span></div>` +
+      `<div class="form-summary-total">Итого: ${fmt(total)} ₽</div>`;
+    // Автозаполняем имя из Telegram
+    const u = tg.initDataUnsafe?.user;
+    if(u){
+      if(u.first_name) document.getElementById('f-name').value = u.first_name;
+      if(u.last_name) document.getElementById('f-lastname').value = u.last_name;
+    }
+    document.getElementById('form-overlay').classList.add('show');
+    document.body.style.overflow='hidden';
+  }
+
+  function closeForm(){
+    document.getElementById('form-overlay').classList.remove('show');
+    document.body.style.overflow='';
+  }
+
+  let selectedDelivery = 'ozon';
+  function selectDelivery(type){
+    selectedDelivery = type;
+    ['ozon','cdek','courier'].forEach(t=>{
+      document.getElementById('del-'+t).classList.toggle('active', t===type);
+    });
+    const pvzGroup = document.getElementById('pvz-group');
+    const addrInput = document.getElementById('f-address');
+    if(type==='courier'){
+      pvzGroup.querySelector('.form-label').textContent = 'Адрес доставки *';
+      addrInput.placeholder = 'ул. Ленина, д.15, кв.42';
+      pvzGroup.querySelector('.form-hint').textContent = '🚚 Укажите полный адрес для курьера';
+    } else if(type==='cdek'){
+      pvzGroup.querySelector('.form-label').textContent = 'Адрес ПВЗ СДЭК *';
+      addrInput.placeholder = 'ул. Пушкина, 10 (СДЭК)';
+      pvzGroup.querySelector('.form-hint').textContent = '💡 Найди ближайший ПВЗ на cdek.ru и скопируй адрес';
+    } else {
+      pvzGroup.querySelector('.form-label').textContent = 'Адрес ПВЗ OZON *';
+      addrInput.placeholder = 'ул. Ленина, 15, ПВЗ №123';
+      pvzGroup.querySelector('.form-hint').textContent = '💡 Найди ближайший ПВЗ на ozon.ru и скопируй адрес';
+    }
+  }
+
+  async function submitOrder(){
+    const name = document.getElementById('f-name').value.trim();
+    const lastname = document.getElementById('f-lastname').value.trim();
+    const phone = document.getElementById('f-phone').value.trim();
+    const ozonPhone = document.getElementById('f-ozon-phone').value.trim();
+    const city = document.getElementById('f-city').value.trim();
+    const address = document.getElementById('f-address').value.trim();
+    const comment = document.getElementById('f-comment').value.trim();
+
+    if(!name){ alert('Введите имя'); return; }
+    if(!lastname){ alert('Введите фамилию'); return; }
+    if(!phone){ alert('Введите телефон'); return; }
+    if(!ozonPhone){ alert('Введите номер телефона привязанный к OZON'); return; }
+    if(!city){ alert('Введите город'); return; }
+    if(!address){ alert('Введите адрес доставки'); return; }
+
+    const btn = document.querySelector('.btn-submit');
+    btn.disabled = true;
+    btn.textContent = '⏳ Отправляем...';
+
+    const u = tg.initDataUnsafe?.user;
+    const tgName = u ? (u.first_name||'')+(u.last_name?' '+u.last_name:'') : 'Гость';
+    const tgUsername = u?.username ? '@'+u.username : 'нет';
+    const tgId = u?.id || 'неизвестен';
+
+    const sum = cart.reduce((s,i)=>s+i.price,0);
+    const deliveryCost = sum >= 5000 ? 0 : 350;
+    const total = sum + deliveryCost;
+    const deliveryTypes = {ozon:'ПВЗ OZON', cdek:'ПВЗ СДЭК', courier:'Курьер'};
+    const itemsList = cart.map(i=>`  • ${i.name} (${i.color}), р.${i.size} — ${fmt(i.price)} ₽`).join('\n');
+
+    const msg =
+`🛍 НОВЫЙ ЗАКАЗ #${Date.now().toString().slice(-6)} — MARATTI
+
+👤 Покупатель: ${name} ${lastname}
+📞 Телефон: ${phone}
+📦 Телефон OZON: ${ozonPhone}
+💬 Telegram: ${tgUsername} (${tgName})
+🆔 TG ID: ${tgId}
+
+📦 Товары:
+${itemsList}
+
+🚚 Доставка: ${deliveryTypes[selectedDelivery]}
+🏙 Город: ${city}
+📍 Адрес: ${address}
+${comment?'💬 Комментарий: '+comment:''}
+
+💰 Сумма: ${fmt(sum)} ₽
+🚚 Стоимость доставки: ${deliveryCost===0?'Бесплатно':fmt(deliveryCost)+' ₽'}
+💳 Итого: ${fmt(total)} ₽
+
+⏰ ${new Date().toLocaleString('ru-RU')}
+
+━━━━━━━━━━━━━━━━━━
+Чтобы ответить клиенту — напишите ему в Telegram: ${tgUsername !== 'нет' ? tgUsername : 'ID '+tgId}`;
+
+    const BOT_TOKEN = '8737124576:AAF45XAKXziRVl2sSSgHuU-o6Rtaio33JBs';
+    const OWNER_ID = '1258838821';
+
+    try {
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ chat_id: OWNER_ID, text: msg, parse_mode: 'HTML' })
+      });
+      // Сохраняем данные клиента локально
+      const clientData = { name, lastname, phone, city, address, tgId, tgUsername };
+      localStorage.setItem('maratti_client', JSON.stringify(clientData));
+    } catch(e){ console.log('err',e); }
+
+    cart = []; updateBadges(); renderCart();
+    closeForm(); showPage('home');
+    btn.disabled = false;
+    btn.textContent = '✅ Подтвердить заказ';
+
+    setTimeout(()=>{
+      if(tg.showAlert){
+        tg.showAlert('✅ Заказ оформлен!\n\nМенеджер MARATTI свяжется с вами по телефону '+phone+' в ближайшее время для подтверждения и оплаты.');
+      } else {
+        alert('✅ Заказ оформлен!\n\nМенеджер свяжется с вами по телефону '+phone);
+      }
+    }, 300);
   }
 
   // NAVIGATION
