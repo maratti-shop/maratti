@@ -306,11 +306,20 @@ async function ghGet(file){
   if(!r.ok) throw new Error('GET '+r.status);
   return r.json();
 }
+function toBase64(str){
+  // Правильное кодирование UTF-8 строки в base64
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m,p) => String.fromCharCode(parseInt(p,16))));
+}
+function fromBase64(str){
+  // Правильное декодирование base64 с поддержкой UTF-8
+  return decodeURIComponent(Array.from(atob(str.replace(/\n/g,''))).map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join(''));
+}
 async function ghPut(file, data, sha, msg){
+  const json = JSON.stringify(data, null, 2);
   const r = await fetch(GH_API+file,{
     method:'PUT',
     headers:{'Authorization':'Bearer '+getToken(),'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},
-    body: JSON.stringify({message:msg, content:btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2)))), sha})
+    body: JSON.stringify({message:msg, content:toBase64(json), sha})
   });
   if(!r.ok){ const e=await r.json(); throw new Error(e.message||r.status); }
   return r.json();
@@ -321,7 +330,7 @@ async function loadFromGitHub(){
   showNotif('⏳ Загружаю товары...');
   try {
     const fd = await ghGet('products.json');
-    const data = JSON.parse(atob(fd.content.replace(/\n/g,'')));
+    const data = JSON.parse(fromBase64(fd.content));
     products = Array.isArray(data)?data:[];
     save();
     renderProducts(); renderDashboard();
@@ -343,7 +352,7 @@ async function loadOrders(){
   if(!getToken()){ orders=JSON.parse(localStorage.getItem('maratti_orders')||'[]'); renderOrders(); renderDashboard(); return; }
   try {
     const fd = await ghGet('orders.json');
-    orders = JSON.parse(atob(fd.content.replace(/\n/g,'')));
+    orders = JSON.parse(fromBase64(fd.content));
     if(!Array.isArray(orders)) orders=[];
     saveOrders();
   } catch(e){ orders=JSON.parse(localStorage.getItem('maratti_orders')||'[]'); }
