@@ -473,33 +473,45 @@
   }
 
   async function saveToGitHub(){
+    const token = getToken();
+    if(!token){ showNotif('❌ Нет токена! Зайди в Настройки'); return; }
     showNotif('⏳ Сохраняю на сайт...');
     try {
-      // Получаем текущий SHA файла
-      const getRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`,{
-        headers:{'Authorization':'token '+getToken(),'Accept':'application/vnd.github.v3+json'}
+      // Всегда получаем свежий SHA без кэша
+      const getRes = await fetch(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`,{
+        headers:{
+          'Authorization':'token '+token,
+          'Accept':'application/vnd.github.v3+json',
+          'Cache-Control':'no-store, no-cache',
+          'Pragma':'no-cache'
+        },
+        cache: 'no-store'
       });
       const fileData = await getRes.json();
+      if(!fileData.sha){ showNotif('❌ Файл не найден на GitHub'); return; }
       const sha = fileData.sha;
-
-      // Кодируем данные в base64
-      const content = btoa(unescape(encodeURIComponent(JSON.stringify(products, null, 2))));
-
-      // Обновляем файл
-      const putRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`,{
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(products, null, 2))));
+      const putRes = await fetch(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`,{
         method:'PUT',
-        headers:{'Authorization':'token '+getToken(),'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-        body: JSON.stringify({ message:'Обновление товаров через админку', content, sha })
+        headers:{
+          'Authorization':'token '+token,
+          'Accept':'application/vnd.github.v3+json',
+          'Content-Type':'application/json'
+        },
+        body: JSON.stringify({ message:'Обновление товаров', content: encoded, sha })
       });
-
       if(putRes.ok){
-        showNotif('✅ Сохранено! Сайт обновится через ~1 мин');
+        showNotif('✅ Сохранено! Бот обновится через ~1 мин');
       } else {
         const err = await putRes.json();
-        showNotif('❌ Ошибка: '+err.message);
+        showNotif('❌ Ошибка: '+(err.message||JSON.stringify(err)));
+        console.error('GitHub error:', err);
       }
     } catch(e){
-      showNotif('❌ Ошибка сети: '+e.message);
+      showNotif('❌ Ошибка: '+e.message);
+      console.error('saveToGitHub error:', e);
     }
   }
   function saveOrders(){ localStorage.setItem('maratti_orders', JSON.stringify(orders)); }
