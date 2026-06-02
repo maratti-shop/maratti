@@ -24,5 +24,31 @@
     "reviews": 0,
     "active": true,
     "id": 1780435934800
+  },
+  {
+    "name": "Кеды натуральная замша",
+    "cat": "sneakers",
+    "catName": "Кеды",
+    "color": "Коричневый",
+    "material": "Натуральная замша",
+    "price": 4989,
+    "old": 16345,
+    "wb": 7200,
+    "disc": 69,
+    "sizes": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45
+    ],
+    "art": "917449734",
+    "photo": "https://basket-40.wbcontent.net/vol9174/part917449/917449734/images/hq/1.webp",
+    "desc": "",
+    "rating": 2.6,
+    "reviews": 0,
+    "active": true,
+    "id": 1780439232221
   }
 ]
