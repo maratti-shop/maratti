@@ -276,6 +276,7 @@
             <div class="main-title">Заказы</div>
             <div class="main-sub" id="orders-count">Нет заказов</div>
           </div>
+          <button class="btn btn-ghost" onclick="loadOrders()">🔄 Обновить заказы</button>
         </div>
         <div class="main-body">
           <div class="table-wrap" id="orders-table-wrap">
@@ -453,7 +454,19 @@
     {id:9,art:'401102751',name:'Кеды MARATTI Premium',cat:'sneakers',catName:'Кеды Premium',color:'Серый',material:'Замша',price:6740,old:9500,wb:7247,disc:29,sizes:[40,41,42,43,44,45],rating:4.7,reviews:420,desc:'Премиум-кеды из замши.',photo:'',active:true}
   ];
 
-  let orders = JSON.parse(localStorage.getItem('maratti_orders') || '[]');
+  let orders = [];
+
+  async function loadOrders(){
+    try {
+      const res = await fetch(`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/orders.json?t=${Date.now()}`);
+      orders = await res.json();
+      localStorage.setItem('maratti_orders', JSON.stringify(orders));
+    } catch(e){
+      orders = JSON.parse(localStorage.getItem('maratti_orders')||'[]');
+    }
+    renderDashboard();
+    renderOrders();
+  }
 
   function saveData(){
     localStorage.setItem('maratti_products', JSON.stringify(products));
@@ -490,6 +503,26 @@
     }
   }
   function saveOrders(){ localStorage.setItem('maratti_orders', JSON.stringify(orders)); }
+
+  async function saveOrdersToGitHub(){
+    const token = getToken();
+    if(!token){ showNotif('❌ Нет токена в Настройках'); return; }
+    try {
+      const getRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/orders.json`,{
+        headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}
+      });
+      const fileData = await getRes.json();
+      await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/orders.json`,{
+        method:'PUT',
+        headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+        body: JSON.stringify({
+          message:'Обновление заказов',
+          content: btoa(unescape(encodeURIComponent(JSON.stringify(orders, null, 2)))),
+          sha: fileData.sha
+        })
+      });
+    } catch(e){ console.log('saveOrders err',e); }
+  }
   function fmt(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,' '); }
 
   // === LOGIN ===
@@ -543,7 +576,7 @@
         <td><div style="font-weight:500">${o.name} ${o.lastname}</div><div style="font-size:11px;color:var(--text-muted)">${o.phone}</div></td>
         <td style="font-size:12px;color:var(--text-soft)">${o.items.map(i=>i.name+' р.'+i.size).join(', ')}</td>
         <td style="color:var(--gold);font-family:Georgia,serif;font-weight:700">${fmt(o.total)} ₽</td>
-        <td><span class="order-status ${o.status}">${o.status==='new'?'🆕 Новый':o.status==='confirmed'?'✅ Подтверждён':'✔️ Выполнен'}</span></td>
+        <td><span class="order-status ${o.status}">${o.status==='new'?'🆕 Новый':o.status==='confirmed'?'✅ Подтверждён':o.status==='cancelled'?'❌ Отменён':'✔️ Выполнен'}</span></td>
       </tr>`).join('')+`</tbody></table>`;
   }
 
@@ -676,10 +709,11 @@
         <td style="font-size:12px;color:var(--text-soft);max-width:200px">${o.items.map(i=>i.name+' р.'+i.size).join(', ')}</td>
         <td style="font-size:12px"><div>${o.deliveryType}</div><div style="color:var(--text-muted);font-size:11px">${o.city}, ${o.address}</div></td>
         <td style="color:var(--gold);font-family:Georgia,serif;font-weight:700">${fmt(o.total)} ₽</td>
-        <td><span class="order-status ${o.status}">${o.status==='new'?'🆕 Новый':o.status==='confirmed'?'✅ Подтверждён':'✔️ Выполнен'}</span></td>
+        <td><span class="order-status ${o.status}">${o.status==='new'?'🆕 Новый':o.status==='confirmed'?'✅ Подтверждён':o.status==='cancelled'?'❌ Отменён':'✔️ Выполнен'}</span></td>
         <td><div class="actions">
           <button class="btn btn-ghost btn-sm" onclick="openOrder(${o.id})">👁</button>
-          ${o.status==='new'?`<button class="btn btn-primary btn-sm" onclick="confirmOrder(${o.id})">✅</button>`:''}
+          ${o.status==='new'?`<button class="btn btn-primary btn-sm" onclick="confirmOrder(${o.id})">✅</button><button class="btn btn-danger btn-sm" onclick="cancelOrder(${o.id})">❌</button>`:''}
+          <button class="btn btn-ghost btn-sm" onclick="deleteOrder(${o.id})">🗑</button>
         </div></td>
       </tr>`).join('')+'</tbody></table>';
   }
@@ -723,7 +757,19 @@
 
   function confirmOrder(id){
     const o = orders.find(x=>x.id===id);
-    if(o){ o.status='confirmed'; saveOrders(); renderOrders(); renderDashboard(); showNotif('✅ Заказ подтверждён!'); }
+    if(o){ o.status='confirmed'; saveOrders(); saveOrdersToGitHub(); renderOrders(); renderDashboard(); showNotif('✅ Заказ подтверждён!'); }
+  }
+
+  function cancelOrder(id){
+    if(!confirm('Отменить заказ?')) return;
+    const o = orders.find(x=>x.id===id);
+    if(o){ o.status='cancelled'; saveOrders(); saveOrdersToGitHub(); renderOrders(); renderDashboard(); showNotif('🗑 Заказ отменён'); }
+  }
+
+  function deleteOrder(id){
+    if(!confirm('Удалить заказ полностью?')) return;
+    orders = orders.filter(x=>x.id!==id);
+    saveOrders(); saveOrdersToGitHub(); renderOrders(); renderDashboard(); showNotif('🗑 Заказ удалён');
   }
   function closeOrderModal(){ document.getElementById('order-modal').classList.remove('show'); }
 
@@ -763,8 +809,7 @@
   }
 
   function renderAll(){
-    renderDashboard(); renderProducts();
-    // Показываем сохранённый токен в настройках
+    renderDashboard(); renderProducts(); loadOrders();
     const t = getToken();
     const tokenField = document.getElementById('s-token');
     if(tokenField && t) tokenField.value = t;
