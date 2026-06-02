@@ -330,11 +330,23 @@ async function loadFromGitHub(){
   showNotif('⏳ Загружаю товары...');
   try {
     const fd = await ghGet('products.json');
-    const data = JSON.parse(fromBase64(fd.content));
-    products = Array.isArray(data)?data:[];
+    let data;
+    try { data = JSON.parse(fromBase64(fd.content)); } catch(e){ data = []; }
+    if(!Array.isArray(data)) data = [];
+    // Проверяем что данные не испорчены — названия должны быть читаемыми
+    const hasGarbled = data.some(p => p.name && /[ÐÑ]/.test(p.name));
+    if(hasGarbled){
+      showNotif('⚠️ На сайте старые данные с ошибками — нажми "Сохранить на сайт" чтобы обновить');
+      return;
+    }
+    if(data.length === 0 && products.length > 0){
+      showNotif('⚠️ На сайте пустой каталог — нажми "Сохранить на сайт"');
+      return;
+    }
+    products = data;
     save();
     renderProducts(); renderDashboard();
-    showNotif('✅ Товары загружены!');
+    showNotif('✅ Товары загружены! '+products.length+' шт.');
   } catch(e){ showNotif('❌ Ошибка: '+e.message); }
 }
 
