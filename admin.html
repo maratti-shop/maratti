@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MARATTI Admin</title>
+  <style>
+    :root{--bg:#0a0f0a;--surface:#111811;--card:#141f14;--card2:#1a261a;--green:#1a4a1a;--green-l:#2d7a2d;--green-b:#3a9c3a;--gold:#c9a84c;--gold-d:#a08030;--text:#e8f0e8;--text-s:#8aaa8a;--text-m:#5a7a5a;--border:#1e2e1e;--border2:#243024;--red:#c0392b;--red-d:#922b21}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+    /* LOGIN */
+    .login-w{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+    .login-b{background:var(--surface);border:1px solid var(--border2);border-top:3px solid var(--gold);border-radius:16px;padding:40px 32px;width:100%;max-width:360px;text-align:center}
+    .login-logo{font-family:Georgia,serif;font-size:28px;font-weight:700;letter-spacing:4px;color:var(--gold);margin-bottom:6px}
+    .login-sub{font-size:13px;color:var(--text-m);margin-bottom:32px}
+    .login-inp{width:100%;background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:13px 16px;font-size:15px;color:var(--text);outline:none;margin-bottom:14px;font-family:inherit}
+    .login-inp:focus{border-color:var(--green-l)}
+    .login-btn{width:100%;background:linear-gradient(135deg,#1a4a1a,#2d7a2d);color:var(--gold);border:1px solid var(--gold-d);padding:14px;font-family:Georgia,serif;font-size:15px;font-weight:700;cursor:pointer;border-radius:10px;letter-spacing:1px}
+    .login-err{color:var(--red);font-size:13px;margin-top:10px;display:none}
+
+    /* LAYOUT */
+    .layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+    .sidebar{background:var(--surface);border-right:1px solid var(--border2);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+    .sb-logo{padding:24px 20px 16px;border-bottom:1px solid var(--border2)}
+    .sb-logo-t{font-family:Georgia,serif;font-size:18px;font-weight:700;letter-spacing:3px;color:var(--gold)}
+    .sb-logo-s{font-size:11px;color:var(--text-m);margin-top:2px}
+    .sb-nav{padding:12px 0;flex:1}
+    .ni{display:flex;align-items:center;gap:10px;padding:11px 20px;font-size:14px;color:var(--text-s);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+    .ni:hover{background:var(--card);color:var(--text)}
+    .ni.on{background:var(--card);color:var(--gold);border-left-color:var(--gold);font-weight:600}
+    .ni .ic{font-size:18px;width:22px;text-align:center}
+    .sb-bottom{padding:16px 20px;border-top:1px solid var(--border2)}
+    .logout{font-size:13px;color:var(--text-m);cursor:pointer;display:flex;align-items:center;gap:8px}
+    .logout:hover{color:var(--red)}
+    .badge-new{margin-left:auto;background:var(--gold);color:#0a0f0a;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;display:none}
+
+    /* MAIN */
+    .main{overflow-y:auto}
+    .mhdr{padding:24px 28px 16px;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center}
+    .mhdr-t{font-family:Georgia,serif;font-size:22px;font-weight:700;color:var(--gold)}
+    .mhdr-s{font-size:13px;color:var(--text-m);margin-top:2px}
+    .mbody{padding:24px 28px}
+
+    /* PAGES */
+    .page{display:none}
+    .page.on{display:block}
+
+    /* STATS */
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+    .stat{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:18px}
+    .stat-n{font-family:Georgia,serif;font-size:28px;font-weight:700;color:var(--gold)}
+    .stat-l{font-size:12px;color:var(--text-m);margin-top:4px}
+    .stat-c{font-size:12px;color:var(--green-b);margin-top:6px}
+
+    /* TABLE */
+    .tw{background:var(--card);border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:16px}
+    .th{padding:16px 20px;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center}
+    .th-t{font-size:15px;font-weight:600;color:var(--text)}
+    table{width:100%;border-collapse:collapse}
+    th{padding:12px 16px;text-align:left;font-size:11px;color:var(--text-m);letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border2)}
+    td{padding:13px 16px;font-size:13px;color:var(--text);border-bottom:1px solid var(--border)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:var(--card2);cursor:pointer}
+    .pc{display:flex;align-items:center;gap:12px}
+    .pt{width:44px;height:44px;background:var(--card2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;overflow:hidden}
+    .pt img{width:100%;height:100%;object-fit:cover}
+    .pn{font-size:13px;font-weight:500;color:var(--text)}
+    .ps{font-size:11px;color:var(--text-m)}
+    .badge{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600}
+    .badge-g{background:rgba(58,156,58,.15);color:var(--green-b)}
+    .badge-gold{background:rgba(201,168,76,.15);color:var(--gold)}
+    .badge-r{background:rgba(192,57,43,.15);color:#e74c3c}
+    .actions{display:flex;gap:6px}
+
+    /* BUTTONS */
+    .btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:opacity .15s}
+    .btn:hover{opacity:.85}
+    .btn:active{opacity:.7}
+    .btn-p{background:linear-gradient(135deg,#1a4a1a,#2d7a2d);color:var(--gold);border:1px solid var(--gold-d)}
+    .btn-save{background:linear-gradient(135deg,#7a4a1a,#c9a84c);color:#0a0f0a;border:1px solid var(--gold)}
+    .btn-d{background:var(--red-d);color:#fff}
+    .btn-g{background:transparent;color:var(--text-s);border:1px solid var(--border2)}
+    .btn-sm{padding:7px 14px;font-size:12px}
+
+    /* MODAL */
+    .mo{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+    .mo.on{display:flex}
+    .mo-box{background:var(--surface);border:1px solid var(--border2);border-top:2px solid var(--gold);border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+    .mo-hdr{padding:20px 24px 14px;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center}
+    .mo-t{font-family:Georgia,serif;font-size:18px;font-weight:700;color:var(--gold)}
+    .mo-close{width:30px;height:30px;background:var(--card);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);font-size:16px}
+    .mo-body{padding:20px 24px 24px}
+    .mo-foot{padding:14px 24px 20px;border-top:1px solid var(--border2);display:flex;justify-content:flex-end;gap:10px}
+
+    /* FORM */
+    .fg{margin-bottom:16px}
+    .fl{font-size:12px;color:var(--text-m);margin-bottom:6px;display:block}
+    .fi{width:100%;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:11px 13px;font-size:14px;color:var(--text);outline:none;font-family:inherit}
+    .fi:focus{border-color:var(--green-l)}
+    .fi::placeholder{color:var(--text-m)}
+    .fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .fta{width:100%;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:11px 13px;font-size:14px;color:var(--text);outline:none;font-family:inherit;resize:vertical;min-height:80px}
+    .fhint{font-size:11px;color:var(--text-m);margin-top:4px}
+    .fsel{width:100%;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:11px 13px;font-size:14px;color:var(--text);outline:none;font-family:inherit}
+
+    /* TOGGLE */
+    .toggle{position:relative;display:inline-block;width:40px;height:22px}
+    .toggle input{opacity:0;width:0;height:0}
+    .tsl{position:absolute;inset:0;background:var(--border2);border-radius:22px;cursor:pointer;transition:.2s}
+    .tsl:before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:var(--text-m);border-radius:50%;transition:.2s}
+    input:checked+.tsl{background:var(--green)}
+    input:checked+.tsl:before{transform:translateX(18px);background:var(--gold)}
+
+    /* ORDER STATUS */
+    .os{padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600}
+    .os-new{background:rgba(201,168,76,.15);color:var(--gold)}
+    .os-confirmed{background:rgba(58,156,58,.15);color:var(--green-b)}
+    .os-cancelled{background:rgba(192,57,43,.15);color:#e74c3c}
+    .os-done{background:rgba(90,90,90,.2);color:var(--text-m)}
+
+    /* EMPTY */
+    .empty{text-align:center;padding:60px 20px;color:var(--text-m)}
+    .empty-ic{font-size:48px;margin-bottom:14px;opacity:.4}
+    .empty-t{font-family:Georgia,serif;font-size:16px;color:var(--text-s);margin-bottom:6px}
+
+    /* NOTIF */
+    .notif{position:fixed;bottom:24px;right:24px;background:var(--green);color:var(--gold);border:1px solid var(--gold-d);padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:999;display:none;animation:fadeIn .2s}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-w">
+    <div class="login-b">
+      <div class="login-logo">MARATTI</div>
+      <div class="login-sub">Панель управления</div>
+      <input class="login-inp" type="password" id="pwd" placeholder="Введите пароль" onkeydown="if(event.key==='Enter')login()">
+      <button class="login-btn" onclick="login()">Войти</button>
+      <div class="login-err" id="login-err">Неверный пароль</div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="panel" style="display:none">
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sb-logo"><div class="sb-logo-t">MARATTI</div><div class="sb-logo-s">Админ панель</div></div>
+      <div class="sb-nav">
+        <div class="ni on" onclick="goPage('dashboard')"><span class="ic">📊</span>Дашборд</div>
+        <div class="ni" onclick="goPage('products')"><span class="ic">👞</span>Товары</div>
+        <div class="ni" onclick="goPage('orders')"><span class="ic">📦</span>Заказы<span class="badge-new" id="nb">0</span></div>
+        <div class="ni" onclick="goPage('settings')"><span class="ic">⚙️</span>Настройки</div>
+      </div>
+      <div class="sb-bottom"><div class="logout" onclick="logout()">🚪 Выйти</div></div>
+    </div>
+
+    <div class="main">
+      <!-- DASHBOARD -->
+      <div class="page on" id="page-dashboard">
+        <div class="mhdr"><div><div class="mhdr-t">Дашборд</div><div class="mhdr-s">Обзор магазина MARATTI</div></div></div>
+        <div class="mbody">
+          <div class="stats">
+            <div class="stat"><div class="stat-n" id="s-products">0</div><div class="stat-l">Товаров</div><div class="stat-c">активных</div></div>
+            <div class="stat"><div class="stat-n" id="s-orders">0</div><div class="stat-l">Заказов</div><div class="stat-c" id="s-new">0 новых</div></div>
+            <div class="stat"><div class="stat-n" id="s-revenue">0 ₽</div><div class="stat-l">Сумма заказов</div><div class="stat-c">с начала работы</div></div>
+            <div class="stat"><div class="stat-n">4.8</div><div class="stat-l">Рейтинг</div><div class="stat-c">⭐ на Wildberries</div></div>
+          </div>
+          <div class="tw"><div class="th"><div class="th-t">Последние заказы</div><button class="btn btn-g btn-sm" onclick="goPage('orders')">Все →</button></div><div id="dash-orders"></div></div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="page" id="page-products">
+        <div class="mhdr">
+          <div><div class="mhdr-t">Товары</div><div class="mhdr-s" id="p-count">0 товаров</div></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-g" onclick="loadFromGitHub()">🔄 Обновить</button>
+            <button class="btn btn-p" onclick="openAddProduct()">+ Добавить</button>
+            <button class="btn btn-save" onclick="saveToGitHub()">🚀 Сохранить на сайт</button>
+          </div>
+        </div>
+        <div class="mbody">
+          <div class="tw"><table><thead><tr><th>Товар</th><th>Категория</th><th>Цена</th><th>WB</th><th>Размеры</th><th>Статус</th><th>Действия</th></tr></thead><tbody id="p-table"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ORDERS -->
+      <div class="page" id="page-orders">
+        <div class="mhdr">
+          <div><div class="mhdr-t">Заказы</div><div class="mhdr-s" id="o-count">Нет заказов</div></div>
+          <button class="btn btn-g" onclick="loadOrders()">🔄 Обновить</button>
+        </div>
+        <div class="mbody"><div id="o-table"></div></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="mhdr"><div><div class="mhdr-t">Настройки</div><div class="mhdr-s">Управление магазином</div></div></div>
+        <div class="mbody">
+          <div class="tw" style="padding:24px;margin-bottom:16px">
+            <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:16px">Магазин</div>
+            <div class="fg"><label class="fl">Телефон</label><input class="fi" value="+7 (989) 476-20-89" id="s-phone"></div>
+            <div class="fg"><label class="fl">Бесплатная доставка от (₽)</label><input class="fi" value="5000" id="s-free" type="number"></div>
+            <div class="fg"><label class="fl">Стоимость доставки (₽)</label><input class="fi" value="350" id="s-del" type="number"></div>
+            <div class="fg">
+              <label class="fl">GitHub Token (для синхронизации)</label>
+              <input class="fi" type="password" id="s-token" placeholder="ghp_...">
+              <div class="fhint">🔒 Хранится только в твоём браузере — никто другой не видит</div>
+            </div>
+            <button class="btn btn-p" onclick="saveSettings()">Сохранить</button>
+          </div>
+          <div class="tw" style="padding:24px">
+            <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:16px">Сменить пароль</div>
+            <div class="fg"><label class="fl">Новый пароль</label><input class="fi" type="password" id="s-pwd" placeholder="Минимум 4 символа"></div>
+            <button class="btn btn-p" onclick="changePwd()">Сменить пароль</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="mo" id="mo-product" onclick="if(event.target===this)closeMoProduct()">
+  <div class="mo-box">
+    <div class="mo-hdr"><div class="mo-t" id="mo-p-title">Добавить товар</div><div class="mo-close" onclick="closeMoProduct()">×</div></div>
+    <div class="mo-body">
+      <input type="hidden" id="edit-id">
+      <div class="fr"><div class="fg"><label class="fl">Название *</label><input class="fi" id="p-name" placeholder="Лоферы Classic"></div><div class="fg"><label class="fl">Категория *</label><select class="fsel" id="p-cat"><option value="loafers">Лоферы</option><option value="shoes">Туфли</option><option value="sneakers">Кеды</option><option value="boots">Ботинки</option></select></div></div>
+      <div class="fr"><div class="fg"><label class="fl">Цвет</label><input class="fi" id="p-color" placeholder="Чёрный"></div><div class="fg"><label class="fl">Материал</label><input class="fi" id="p-material" placeholder="Натуральная кожа"></div></div>
+      <div class="fr3"><div class="fg"><label class="fl">Цена в боте (₽) *</label><input class="fi" id="p-price" type="number" placeholder="6600"></div><div class="fg"><label class="fl">Старая цена (₽)</label><input class="fi" id="p-old" type="number" placeholder="16000"></div><div class="fg"><label class="fl">Цена на WB (₽)</label><input class="fi" id="p-wb" type="number" placeholder="7105"></div></div>
+      <div class="fg"><label class="fl">Артикул WB</label><input class="fi" id="p-art" placeholder="844798824"></div>
+      <div class="fg"><label class="fl">Размеры (через запятую)</label><input class="fi" id="p-sizes" placeholder="40, 41, 42, 43, 44, 45"></div>
+      <div class="fg"><label class="fl">Рейтинг</label><input class="fi" id="p-rating" type="number" step="0.1" min="1" max="5" placeholder="4.8"></div>
+      <div class="fg"><label class="fl">Фото (ссылка)</label><input class="fi" id="p-photo" placeholder="https://..."><div class="fhint">Загрузи фото на imgur.com и вставь ссылку</div></div>
+      <div class="fg"><label class="fl">Описание</label><textarea class="fta" id="p-desc" placeholder="Описание товара..."></textarea></div>
+      <div class="fg" style="display:flex;align-items:center;gap:12px"><label class="toggle"><input type="checkbox" id="p-active" checked><span class="tsl"></span></label><span style="font-size:14px;color:var(--text-s)">Показывать в каталоге</span></div>
+    </div>
+    <div class="mo-foot"><button class="btn btn-g" onclick="closeMoProduct()">Отмена</button><button class="btn btn-p" onclick="saveProduct()">Сохранить</button></div>
+  </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div class="mo" id="mo-order" onclick="if(event.target===this)closeMoOrder()">
+  <div class="mo-box">
+    <div class="mo-hdr"><div class="mo-t">Детали заказа</div><div class="mo-close" onclick="closeMoOrder()">×</div></div>
+    <div class="mo-body" id="mo-o-body"></div>
+    <div class="mo-foot"><button class="btn btn-g" onclick="closeMoOrder()">Закрыть</button><button class="btn btn-p" id="mo-o-confirm" style="display:none" onclick="confirmFromModal()">✅ Подтвердить</button></div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+const DEFAULT_PWD = 'maratti2006';
+const GITHUB_OWNER = 'maratti-shop';
+const GITHUB_REPO = 'maratti';
+const GH_API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/`;
+
+let products = [];
+let orders = [];
+let currentOrderId = null;
+
+function fmt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '); }
+function getToken(){ return localStorage.getItem('gh_token')||''; }
+function getPwd(){ return localStorage.getItem('admin_pwd')||DEFAULT_PWD; }
+function save(){ localStorage.setItem('maratti_products',JSON.stringify(products)); }
+function saveOrders(){ localStorage.setItem('maratti_orders',JSON.stringify(orders)); }
+function showNotif(msg){ const el=document.getElementById('notif'); el.textContent=msg; el.style.display='block'; setTimeout(()=>el.style.display='none',3000); }
+
+// ── LOGIN ──
+function login(){
+  if(document.getElementById('pwd').value===getPwd()){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('panel').style.display='block';
+    init();
+  } else {
+    document.getElementById('login-err').style.display='block';
+  }
+}
+function logout(){ document.getElementById('login-screen').style.display='block'; document.getElementById('panel').style.display='none'; document.getElementById('pwd').value=''; }
+
+// ── NAVIGATION ──
+function goPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('page-'+page).classList.add('on');
+  document.querySelectorAll('.ni').forEach(n=>{ if(n.textContent.trim().startsWith(page==='dashboard'?'📊':page==='products'?'👞':page==='orders'?'📦':'⚙️')) n.classList.add('on'); });
+  if(page==='products') renderProducts();
+  if(page==='orders') renderOrders();
+  if(page==='dashboard') renderDashboard();
+  if(page==='settings'){ const t=getToken(); if(t) document.getElementById('s-token').value=t; }
+}
+
+// ── GITHUB ──
+async function ghGet(file){
+  const r = await fetch(GH_API+file,{
+    headers:{'Authorization':'Bearer '+getToken(),'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},
+    cache:'no-store'
+  });
+  if(!r.ok) throw new Error('GET '+r.status);
+  return r.json();
+}
+async function ghPut(file, data, sha, msg){
+  const r = await fetch(GH_API+file,{
+    method:'PUT',
+    headers:{'Authorization':'Bearer '+getToken(),'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},
+    body: JSON.stringify({message:msg, content:btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2)))), sha})
+  });
+  if(!r.ok){ const e=await r.json(); throw new Error(e.message||r.status); }
+  return r.json();
+}
+
+async function loadFromGitHub(){
+  if(!getToken()){ showNotif('❌ Введи токен в Настройках!'); return; }
+  showNotif('⏳ Загружаю товары...');
+  try {
+    const fd = await ghGet('products.json');
+    const data = JSON.parse(atob(fd.content.replace(/\n/g,'')));
+    products = Array.isArray(data)?data:[];
+    save();
+    renderProducts(); renderDashboard();
+    showNotif('✅ Товары загружены!');
+  } catch(e){ showNotif('❌ Ошибка: '+e.message); }
+}
+
+async function saveToGitHub(){
+  if(!getToken()){ showNotif('❌ Введи токен в Настройках!'); return; }
+  showNotif('⏳ Сохраняю на сайт...');
+  try {
+    const fd = await ghGet('products.json');
+    await ghPut('products.json', products, fd.sha, 'update products');
+    showNotif('✅ Сохранено! Бот обновится через ~1 мин');
+  } catch(e){ showNotif('❌ Ошибка: '+e.message); console.error(e); }
+}
+
+async function loadOrders(){
+  if(!getToken()){ orders=JSON.parse(localStorage.getItem('maratti_orders')||'[]'); renderOrders(); renderDashboard(); return; }
+  try {
+    const fd = await ghGet('orders.json');
+    orders = JSON.parse(atob(fd.content.replace(/\n/g,'')));
+    if(!Array.isArray(orders)) orders=[];
+    saveOrders();
+  } catch(e){ orders=JSON.parse(localStorage.getItem('maratti_orders')||'[]'); }
+  renderOrders(); renderDashboard();
+}
+
+async function saveOrdersToGitHub(){
+  if(!getToken()) return;
+  try {
+    const fd = await ghGet('orders.json');
+    await ghPut('orders.json', orders, fd.sha, 'update orders');
+  } catch(e){ console.error('save orders err',e); }
+}
+
+// ── DASHBOARD ──
+function renderDashboard(){
+  document.getElementById('s-products').textContent = products.filter(p=>p.active!==false).length;
+  document.getElementById('s-orders').textContent = orders.length;
+  const nw = orders.filter(o=>o.status==='new').length;
+  document.getElementById('s-new').textContent = nw+' новых';
+  document.getElementById('s-revenue').textContent = fmt(orders.reduce((s,o)=>s+(o.total||0),0))+' ₽';
+  const nb = document.getElementById('nb');
+  if(nw){ nb.style.display='inline'; nb.textContent=nw; } else { nb.style.display='none'; }
+  const last = [...orders].reverse().slice(0,5);
+  const el = document.getElementById('dash-orders');
+  if(!last.length){ el.innerHTML='<div class="empty"><div class="empty-ic">📦</div><div class="empty-t">Заказов пока нет</div></div>'; return; }
+  el.innerHTML='<table><thead><tr><th>№</th><th>Покупатель</th><th>Сумма</th><th>Статус</th></tr></thead><tbody>'+
+    last.map(o=>`<tr onclick="openOrder(${o.id})"><td>#${String(o.id).slice(-6)}</td><td><div style="font-weight:500">${o.name||''} ${o.lastname||''}</div><div style="font-size:11px;color:var(--text-m)">${o.phone||''}</div></td><td style="color:var(--gold);font-family:Georgia,serif;font-weight:700">${fmt(o.total||0)} ₽</td><td><span class="os os-${o.status}">${statusLabel(o.status)}</span></td></tr>`).join('')+
+    '</tbody></table>';
+}
+
+function statusLabel(s){ return s==='new'?'🆕 Новый':s==='confirmed'?'✅ Подтверждён':s==='cancelled'?'❌ Отменён':'✔️ Выполнен'; }
+
+// ── PRODUCTS ──
+function renderProducts(){
+  document.getElementById('p-count').textContent = products.length+' товаров';
+  const catNames={loafers:'Лоферы',shoes:'Туфли',sneakers:'Кеды',boots:'Ботинки'};
+  document.getElementById('p-table').innerHTML = products.length ? products.map(p=>`
+    <tr>
+      <td><div class="pc"><div class="pt">${p.photo?`<img src="${p.photo}" alt="">`:'👞'}</div><div><div class="pn">${p.name}</div><div class="ps">${p.color||''} · ${p.art?'Арт. '+p.art:''}</div></div></div></td>
+      <td><span class="badge badge-gold">${catNames[p.cat]||p.cat}</span></td>
+      <td style="font-family:Georgia,serif;font-weight:700;color:var(--gold)">${fmt(p.price)} ₽</td>
+      <td style="color:var(--text-m)">${p.wb?fmt(p.wb)+' ₽':'—'}</td>
+      <td style="font-size:12px;color:var(--text-s)">${(p.sizes||[]).join(', ')||'—'}</td>
+      <td><label class="toggle"><input type="checkbox" ${p.active!==false?'checked':''} onchange="toggleProduct(${JSON.stringify(p.id)},this.checked)"><span class="tsl"></span></label></td>
+      <td><div class="actions"><button class="btn btn-g btn-sm" onclick="openEditProduct(${JSON.stringify(p.id)})">✏️</button><button class="btn btn-d btn-sm" onclick="deleteProduct(${JSON.stringify(p.id)})">🗑</button></div></td>
+    </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-m)">Товаров нет. Нажми "+ Добавить"</td></tr>';
+}
+
+function toggleProduct(id,active){
+  const p=products.find(x=>x.id===id);
+  if(p){ p.active=active; save(); saveToGitHub(); showNotif(active?'✅ Показан':'👁 Скрыт'); }
+}
+
+function openAddProduct(){
+  document.getElementById('mo-p-title').textContent='Добавить товар';
+  document.getElementById('edit-id').value='';
+  ['p-name','p-color','p-material','p-price','p-old','p-wb','p-art','p-photo','p-desc','p-rating'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('p-sizes').value='40, 41, 42, 43, 44, 45';
+  document.getElementById('p-cat').value='loafers';
+  document.getElementById('p-active').checked=true;
+  document.getElementById('mo-product').classList.add('on');
+}
+
+function openEditProduct(id){
+  const p=products.find(x=>x.id===id); if(!p) return;
+  document.getElementById('mo-p-title').textContent='Редактировать товар';
+  document.getElementById('edit-id').value=id;
+  document.getElementById('p-name').value=p.name||'';
+  document.getElementById('p-cat').value=p.cat||'loafers';
+  document.getElementById('p-color').value=p.color||'';
+  document.getElementById('p-material').value=p.material||'';
+  document.getElementById('p-price').value=p.price||'';
+  document.getElementById('p-old').value=p.old||'';
+  document.getElementById('p-wb').value=p.wb||'';
+  document.getElementById('p-art').value=p.art||'';
+  document.getElementById('p-photo').value=p.photo||'';
+  document.getElementById('p-desc').value=p.desc||'';
+  document.getElementById('p-sizes').value=(p.sizes||[]).join(', ');
+  document.getElementById('p-rating').value=p.rating||'';
+  document.getElementById('p-active').checked=p.active!==false;
+  document.getElementById('mo-product').classList.add('on');
+}
+
+function saveProduct(){
+  const name=document.getElementById('p-name').value.trim();
+  const price=parseInt(document.getElementById('p-price').value);
+  if(!name){ alert('Введите название'); return; }
+  if(!price){ alert('Введите цену'); return; }
+  const cat=document.getElementById('p-cat').value;
+  const catNames={loafers:'Лоферы · Кожа',shoes:'Туфли · Кожа',sneakers:'Кеды',boots:'Ботинки'};
+  const sizes=document.getElementById('p-sizes').value.split(',').map(s=>parseInt(s.trim())).filter(Boolean);
+  const old=parseInt(document.getElementById('p-old').value)||0;
+  const wb=parseInt(document.getElementById('p-wb').value)||0;
+  const disc=old?Math.round((1-price/old)*100):0;
+  const editId=document.getElementById('edit-id').value;
+  const data={name,cat,catName:catNames[cat]||cat,color:document.getElementById('p-color').value.trim(),material:document.getElementById('p-material').value.trim(),price,old,wb,disc,sizes,art:document.getElementById('p-art').value.trim(),photo:document.getElementById('p-photo').value.trim(),desc:document.getElementById('p-desc').value.trim(),rating:parseFloat(document.getElementById('p-rating').value)||5.0,reviews:0,active:document.getElementById('p-active').checked};
+  if(editId){
+    const idx=products.findIndex(p=>String(p.id)===String(editId));
+    if(idx!==-1) products[idx]={...products[idx],...data};
+    showNotif('✅ Товар обновлён!');
+  } else {
+    data.id=Date.now();
+    products.push(data);
+    showNotif('✅ Товар добавлен!');
+  }
+  save(); closeMoProduct(); renderProducts();
+  saveToGitHub();
+}
+
+function deleteProduct(id){
+  if(!confirm('Удалить товар?')) return;
+  products=products.filter(p=>String(p.id)!==String(id));
+  save(); renderProducts(); saveToGitHub(); showNotif('🗑 Товар удалён');
+}
+function closeMoProduct(){ document.getElementById('mo-product').classList.remove('on'); }
+
+// ── ORDERS ──
+function renderOrders(){
+  document.getElementById('o-count').textContent = orders.length?orders.length+' заказов':'Нет заказов';
+  const el=document.getElementById('o-table');
+  if(!orders.length){ el.innerHTML='<div class="empty"><div class="empty-ic">📦</div><div class="empty-t">Заказов пока нет</div><div style="font-size:13px">Они появятся когда клиенты оформят покупку</div></div>'; return; }
+  el.innerHTML='<div class="tw"><table><thead><tr><th>№</th><th>Покупатель</th><th>Товары</th><th>Доставка</th><th>Сумма</th><th>Статус</th><th>Действия</th></tr></thead><tbody>'+
+    [...orders].reverse().map(o=>`<tr>
+      <td style="color:var(--text-m)">#${String(o.id).slice(-6)}</td>
+      <td><div style="font-weight:500">${o.name||''} ${o.lastname||''}</div><div style="font-size:11px;color:var(--text-m)">${o.phone||''}</div></td>
+      <td style="font-size:12px;color:var(--text-s);max-width:180px">${(o.items||[]).map(i=>i.name+' р.'+i.size).join(', ')}</td>
+      <td style="font-size:12px"><div>${o.deliveryType||''}</div><div style="color:var(--text-m);font-size:11px">${o.city||''}</div></td>
+      <td style="color:var(--gold);font-family:Georgia,serif;font-weight:700">${fmt(o.total||0)} ₽</td>
+      <td><span class="os os-${o.status}">${statusLabel(o.status)}</span></td>
+      <td><div class="actions">
+        <button class="btn btn-g btn-sm" onclick="openOrder(${o.id})">👁</button>
+        ${o.status==='new'?`<button class="btn btn-p btn-sm" onclick="confirmOrder(${o.id})">✅</button>`:''}
+        ${o.status==='new'?`<button class="btn btn-d btn-sm" onclick="cancelOrder(${o.id})">❌</button>`:''}
+        <button class="btn btn-g btn-sm" onclick="deleteOrder(${o.id})">🗑</button>
+      </div></td>
+    </tr>`).join('')+'</tbody></table></div>';
+}
+
+function openOrder(id){
+  const o=orders.find(x=>x.id===id); if(!o) return;
+  currentOrderId=id;
+  document.getElementById('mo-o-body').innerHTML=`
+    <div style="display:grid;gap:14px">
+      <div class="tw" style="padding:16px"><div style="font-size:12px;color:var(--text-m);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Покупатель</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px">${o.name||''} ${o.lastname||''}</div>
+        <div style="font-size:13px;color:var(--text-s)">📞 ${o.phone||'—'}</div>
+        <div style="font-size:13px;color:var(--text-s)">📦 OZON: ${o.ozonPhone||'—'}</div>
+        <div style="font-size:13px;color:var(--text-s)">💬 ${o.tgUsername||'нет Telegram'}</div>
+        <div style="font-size:13px;color:var(--text-s)">🆔 ${o.tgId||'—'}</div>
+      </div>
+      <div class="tw" style="padding:16px"><div style="font-size:12px;color:var(--text-m);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Доставка</div>
+        <div style="font-size:13px;color:var(--text-s)">🚚 ${o.deliveryType||'—'}</div>
+        <div style="font-size:13px;color:var(--text-s)">🏙 ${o.city||'—'}</div>
+        <div style="font-size:13px;color:var(--text-s)">📍 ${o.address||'—'}</div>
+        ${o.comment?`<div style="font-size:13px;color:var(--text-s)">💬 ${o.comment}</div>`:''}
+      </div>
+      <div class="tw" style="padding:16px"><div style="font-size:12px;color:var(--text-m);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Товары</div>
+        ${(o.items||[]).map(i=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${i.name}, р.${i.size}</span><span style="color:var(--gold);font-family:Georgia,serif;font-weight:700">${fmt(i.price)} ₽</span></div>`).join('')}
+        <div style="text-align:right;margin-top:10px;font-family:Georgia,serif;font-size:17px;font-weight:700;color:var(--gold)">Итого: ${fmt(o.total||0)} ₽</div>
+      </div>
+      <div style="text-align:center;font-size:12px;color:var(--text-m)">${o.date||''}</div>
+    </div>`;
+  const cb=document.getElementById('mo-o-confirm');
+  if(o.status==='new'){ cb.style.display='block'; } else { cb.style.display='none'; }
+  document.getElementById('mo-order').classList.add('on');
+}
+function closeMoOrder(){ document.getElementById('mo-order').classList.remove('on'); currentOrderId=null; }
+function confirmFromModal(){ if(currentOrderId) confirmOrder(currentOrderId); closeMoOrder(); }
+
+function confirmOrder(id){ const o=orders.find(x=>x.id===id); if(o){ o.status='confirmed'; saveOrders(); saveOrdersToGitHub(); renderOrders(); renderDashboard(); showNotif('✅ Заказ подтверждён!'); } }
+function cancelOrder(id){ if(!confirm('Отменить заказ?')) return; const o=orders.find(x=>x.id===id); if(o){ o.status='cancelled'; saveOrders(); saveOrdersToGitHub(); renderOrders(); renderDashboard(); showNotif('❌ Заказ отменён'); } }
+function deleteOrder(id){ if(!confirm('Удалить заказ?')) return; orders=orders.filter(x=>x.id!==id); saveOrders(); saveOrdersToGitHub(); renderOrders(); renderDashboard(); showNotif('🗑 Заказ удалён'); }
+
+// ── SETTINGS ──
+function saveSettings(){ const t=document.getElementById('s-token').value.trim(); if(t) localStorage.setItem('gh_token',t); showNotif('✅ Настройки сохранены!'); }
+function changePwd(){ const p=document.getElementById('s-pwd').value; if(p.length<4){ alert('Минимум 4 символа'); return; } localStorage.setItem('admin_pwd',p); document.getElementById('s-pwd').value=''; showNotif('✅ Пароль изменён!'); }
+
+// ── INIT ──
+function init(){
+  products=JSON.parse(localStorage.getItem('maratti_products')||'[]');
+  orders=JSON.parse(localStorage.getItem('maratti_orders')||'[]');
+  renderDashboard(); renderProducts();
+  const t=getToken(); if(t) document.getElementById('s-token').value=t;
+  if(getToken()) loadOrders();
+}
+</script>
+</body>
+</html>
