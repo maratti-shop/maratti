@@ -157,6 +157,16 @@
     .empty-t{font-family:Georgia,serif;font-size:17px;margin-bottom:6px;color:var(--text-s)}
     .empty-s{font-size:13px;line-height:1.6}
     .gold-line{height:1px;background:linear-gradient(90deg,transparent,var(--gold-d),transparent);margin:4px 16px}
+    .promo-code-w{padding:0 16px;margin-bottom:8px}
+    .promo-code-row{display:flex;gap:8px}
+    .promo-inp{flex:1;background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--text);outline:none;font-family:inherit;text-transform:uppercase}
+    .promo-inp:focus{border-color:var(--green-l)}
+    .promo-inp::placeholder{color:var(--text-m);text-transform:none}
+    .promo-btn{padding:11px 18px;background:var(--green);color:var(--gold);border:1px solid var(--gold-d);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
+    .promo-btn:active{opacity:.8}
+    .promo-result{margin-top:8px;padding:10px 14px;border-radius:8px;font-size:13px;display:none}
+    .promo-result.ok{background:rgba(58,156,58,.15);color:var(--green-b);border:1px solid var(--green-l)}
+    .promo-result.err{background:rgba(192,57,43,.15);color:#e74c3c;border:1px solid var(--red)}
   </style>
 </head>
 <body>
@@ -293,6 +303,15 @@
       <div class="fo-sec">Комментарий</div>
       <div class="fg"><label class="fl">Дополнительно (необязательно)</label><input class="fi" id="f-comment" placeholder="Позвонить перед доставкой..." maxlength="300"></div>
 
+      <div class="fo-sec">Промокод</div>
+      <div class="promo-code-w" style="padding:0">
+        <div class="promo-code-row">
+          <input class="promo-inp" id="promo-input" placeholder="Введите промокод" maxlength="20">
+          <button class="promo-btn" onclick="applyPromo()">Применить</button>
+        </div>
+        <div class="promo-result" id="promo-result"></div>
+      </div>
+      <div style="height:12px"></div>
       <button class="btn-submit" id="btn-submit" onclick="submitOrder()">✅ Подтвердить заказ</button>
     </div>
   </div>
@@ -457,11 +476,7 @@ function renderCart(){
       <div class="cart-del" onclick="removeFromCart('${i.key}')">🗑</div>
     </div>`;
   }).join('');
-  const sum = cart.reduce((s,i)=>s+i.price,0);
-  const del = sum>=5000?0:350;
-  document.getElementById('ct-items').textContent = fmt(sum)+' ₽';
-  document.getElementById('ct-del').textContent = del===0?'Бесплатно':fmt(del)+' ₽';
-  document.getElementById('ct-total').textContent = fmt(sum+del)+' ₽';
+  updateCartTotal();
 }
 
 // ── FORM ──
@@ -515,23 +530,39 @@ async function submitOrder(){
   const tgId = u?.id||'неизвестен';
   const sum = cart.reduce((s,i)=>s+i.price,0);
   const delCost = sum>=5000?0:350;
-  const total = sum+delCost;
+  const promoDisc = appliedPromo ? Math.min(appliedPromo.discount, sum) : 0;
+  const total = sum + delCost - promoDisc;
   const delTypes={ozon:'ПВЗ OZON',cdek:'ПВЗ СДЭК',courier:'Курьер'};
   const orderId = Date.now();
 
   const msg = `🛍 НОВЫЙ ЗАКАЗ #${String(orderId).slice(-6)} — MARATTI\n\n`+
     `👤 ${name} ${last}\n📞 ${phone}\n📦 OZON: ${ozon}\n💬 ${tgUsername} (${tgName})\n🆔 ${tgId}\n\n`+
-    `📦 Товары:\n${cart.map(i=>`  • ${i.name}, р.${i.size} — ${fmt(i.price)} ₽`).join('\n')}\n\n`+
+    `📦 Товары:\n${cart.map(i=>`  • ${i.name}${i.color?' ('+i.color+')':''}, р.${i.size} — ${fmt(i.price)} ₽\n    🔖 Арт: ${i.art||'нет'}`).join('\n')}\n\n`+
     `🚚 ${delTypes[selDel_]}\n🏙 ${city}\n📍 ${addr}\n${comment?'💬 '+comment+'\n':''}\n`+
     `💰 ${fmt(sum)} ₽  🚚 ${delCost===0?'Бесплатно':fmt(delCost)+' ₽'}  💳 Итого: ${fmt(total)} ₽\n`+
     `⏰ ${new Date().toLocaleString('ru-RU')}\n\n━━━━━━━━━━━━\nОтветить: ${tgUsername!=='нет'?tgUsername:'ID '+tgId}`;
 
   try {
-    // Отправляем в Telegram
+    // Отправляем текст заказа в Telegram
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({chat_id:OWNER_ID, text:msg})
     });
+    // Отправляем фото каждого товара если есть
+    for(const item of cart){
+      if(item.photo){
+        try {
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,{
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+              chat_id: OWNER_ID,
+              photo: item.photo,
+              caption: `👞 ${item.name}\nЦвет: ${item.color||'—'}\nРазмер: ${item.size}\nАрт: ${item.art||'—'}\nЦена: ${fmt(item.price)} ₽`
+            })
+          });
+        } catch(e){ console.log('photo send err', e); }
+      }
+    }
 
     // Сохраняем заказ в orders.json
     const ghToken = localStorage.getItem('gh_token')||'';
@@ -554,6 +585,14 @@ async function submitOrder(){
     }
   } catch(e){ console.log('submit err',e); }
 
+  // Сохраняем использованный промокод
+  if(appliedPromo){
+    const used = JSON.parse(localStorage.getItem('used_promos')||'[]');
+    if(!used.includes(appliedPromo.code)){ used.push(appliedPromo.code); localStorage.setItem('used_promos',JSON.stringify(used)); }
+  }
+  appliedPromo=null;
+  document.getElementById('promo-input').value='';
+  const pr=document.getElementById('promo-result'); if(pr){ pr.style.display='none'; }
   cart=[]; updateBadges(); renderCart(); closeFo(); goPage('home');
   btn.disabled=false; btn.textContent='✅ Подтвердить заказ';
   setTimeout(()=>tg.showAlert('✅ Заказ оформлен!\n\nМенеджер MARATTI свяжется с вами по номеру '+phone+' в ближайшее время.'),300);
@@ -580,6 +619,46 @@ function updateBadges(){
   const cb=document.getElementById('cb'), fb=document.getElementById('fb');
   if(cart.length){cb.style.display='flex';cb.textContent=cart.length;}else{cb.style.display='none';}
   if(favorites.length){fb.style.display='flex';fb.textContent=favorites.length;}else{fb.style.display='none';}
+}
+
+// ── PROMO ──
+const PROMO_CODES = {
+  'ИНСТА': { discount: 500, type: 'fixed', desc: 'Скидка 500 ₽' },
+  'INSTA':  { discount: 500, type: 'fixed', desc: 'Скидка 500 ₽' },
+  'MARATTI': { discount: 500, type: 'fixed', desc: 'Скидка 500 ₽ для подписчиков' }
+};
+let appliedPromo = null;
+
+function applyPromo(){
+  const code = (document.getElementById('promo-input').value||'').trim().toUpperCase();
+  const res = document.getElementById('promo-result');
+  if(!code){ res.className='promo-result err'; res.style.display='block'; res.textContent='Введите промокод'; return; }
+  const promo = PROMO_CODES[code];
+  if(!promo){ res.className='promo-result err'; res.style.display='block'; res.textContent='❌ Промокод не найден'; appliedPromo=null; updateCartTotal(); return; }
+  // Проверяем одноразовость
+  const usedCodes = JSON.parse(localStorage.getItem('used_promos')||'[]');
+  if(usedCodes.includes(code)){ res.className='promo-result err'; res.style.display='block'; res.textContent='❌ Вы уже использовали этот промокод'; appliedPromo=null; updateCartTotal(); return; }
+  appliedPromo = {code, ...promo};
+  res.className='promo-result ok'; res.style.display='block'; res.textContent='✅ Промокод применён: '+promo.desc;
+  updateCartTotal();
+}
+
+function updateCartTotal(){
+  const sum = cart.reduce((s,i)=>s+i.price,0);
+  const del = sum>=5000?0:350;
+  const disc = appliedPromo ? Math.min(appliedPromo.discount, sum) : 0;
+  const total = sum + del - disc;
+  document.getElementById('ct-items').textContent = fmt(sum)+' ₽';
+  document.getElementById('ct-del').textContent = del===0?'Бесплатно':fmt(del)+' ₽';
+  document.getElementById('ct-total').textContent = fmt(total)+' ₽';
+  // Обновляем сводку в форме
+  const summaryEl = document.getElementById('fo-summary');
+  if(summaryEl){
+    summaryEl.innerHTML = cart.map(i=>`<div class="f-sum-item"><span>${i.name} р.${i.size}</span><span>${fmt(i.price)} ₽</span></div>`).join('')+
+      `<div class="f-sum-item"><span>Доставка</span><span>${del===0?'Бесплатно':fmt(del)+' ₽'}</span></div>`+
+      (disc?`<div class="f-sum-item" style="color:var(--green-b)"><span>Промокод ${appliedPromo.code}</span><span>−${fmt(disc)} ₽</span></div>`:'')+
+      `<div class="f-sum-total">Итого: ${fmt(total)} ₽</div>`;
+  }
 }
 
 // ── INIT ──
