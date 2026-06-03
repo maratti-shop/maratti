@@ -196,5 +196,38 @@
     "reviews": 0,
     "active": true,
     "id": 1780504736494
+  },
+  {
+    "name": "Лоферы летние замшевые",
+    "cat": "loafers",
+    "catName": "Лоферы · Кожа",
+    "color": "Бежевый",
+    "material": "Натуральная замша",
+    "price": 5600,
+    "old": 17670,
+    "wb": 7250,
+    "disc": 68,
+    "sizes": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45
+    ],
+    "art": "844798824",
+    "photo": "https://basket-38.wbcontent.net/vol8447/part844798/844798824/images/hq/1.webp",
+    "photos": [
+      "https://basket-38.wbcontent.net/vol8447/part844798/844798824/images/hq/1.webp",
+      "https://basket-38.wbcontent.net/vol8447/part844798/844798824/images/hq/2.webp",
+      "https://basket-38.wbcontent.net/vol8447/part844798/844798824/images/hq/3.webp",
+      "https://basket-38.wbcontent.net/vol8447/part844798/844798824/images/hq/7.webp",
+      "https://basket-38.wbcontent.net/vol8447/part844798/844798824/images/hq/9.webp"
+    ],
+    "desc": "",
+    "rating": 4.8,
+    "reviews": 0,
+    "active": true,
+    "id": 1780504926976
   }
 ]
