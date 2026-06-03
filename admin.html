@@ -324,7 +324,16 @@
     <div class="mo-body">
       <div class="fg">
         <label class="fl">Товар *</label>
-        <select class="fsel" id="rv-product"></select>
+        <select class="fsel" id="rv-product" onchange="previewRvProduct()"></select>
+      </div>
+      <div id="rv-product-preview" style="display:none;background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:8px">
+        <div class="pc">
+          <div class="pt" id="rv-preview-img">👞</div>
+          <div>
+            <div class="pn" id="rv-preview-name"></div>
+            <div class="ps" id="rv-preview-art"></div>
+          </div>
+        </div>
       </div>
       <div class="fg">
         <label class="fl">Имя покупателя *</label>
@@ -505,16 +514,18 @@ function statusLabel(s){ return s==='new'?'🆕 Новый':s==='confirmed'?'✅
 function renderProducts(){
   document.getElementById('p-count').textContent = products.length+' товаров';
   const catNames={loafers:'Лоферы',shoes:'Туфли',sneakers:'Кеды',boots:'Ботинки'};
-  document.getElementById('p-table').innerHTML = products.length ? products.map(p=>`
-    <tr>
-      <td><div class="pc"><div class="pt">${(p.photos&&p.photos[0])||p.photo?`<img src="${(p.photos&&p.photos[0])||p.photo}" alt="">`:'👞'}</div><div><div class="pn">${p.name}</div><div class="ps">${p.color||''} · ${p.art?'Арт. '+p.art:''}</div></div></div></td>
+  document.getElementById('p-table').innerHTML = products.length ? products.map(p=>{
+    const pPhoto=(p.photos&&p.photos[0])||p.photo||'';
+    const pPhotoHtml=pPhoto?'<img src="'+pPhoto+'" alt="">':'👞';
+    return `<tr>
+      <td><div class="pc"><div class="pt">${pPhotoHtml}</div><div><div class="pn">${p.name}</div><div class="ps">${p.color||''} · ${p.art?'Арт. '+p.art:''}</div></div></div></td>
       <td><span class="badge badge-gold">${catNames[p.cat]||p.cat}</span></td>
       <td style="font-family:Georgia,serif;font-weight:700;color:var(--gold)">${fmt(p.price)} ₽</td>
       <td style="color:var(--text-m)">${p.wb?fmt(p.wb)+' ₽':'—'}</td>
       <td style="font-size:12px;color:var(--text-s)">${(p.sizes||[]).join(', ')||'—'}</td>
       <td><label class="toggle"><input type="checkbox" ${p.active!==false?'checked':''} onchange="toggleProduct(${JSON.stringify(p.id)},this.checked)"><span class="tsl"></span></label></td>
       <td><div class="actions"><button class="btn btn-g btn-sm" onclick="openEditProduct(${JSON.stringify(p.id)})">✏️</button><button class="btn btn-d btn-sm" onclick="deleteProduct(${JSON.stringify(p.id)})">🗑</button></div></td>
-    </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-m)">Товаров нет. Нажми "+ Добавить"</td></tr>';
+    </tr>`;}).join('') : '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-m)">Товаров нет. Нажми "+ Добавить"</td></tr>';
 }
 
 function toggleProduct(id,active){
@@ -592,7 +603,10 @@ function renderOrders(){
   const el=document.getElementById('o-table');
   if(!orders.length){ el.innerHTML='<div class="empty"><div class="empty-ic">📦</div><div class="empty-t">Заказов пока нет</div><div style="font-size:13px">Они появятся когда клиенты оформят покупку</div></div>'; return; }
   el.innerHTML='<div class="tw"><table><thead><tr><th>№</th><th>Покупатель</th><th>Товары</th><th>Доставка</th><th>Сумма</th><th>Статус</th><th>Действия</th></tr></thead><tbody>'+
-    [...orders].reverse().map(o=>`<tr>
+    [...orders].reverse().map(o=>{
+      const confirmBtn = o.status==='new' ? '<button class="btn btn-p btn-sm" onclick="confirmOrder('+o.id+')">✅</button>' : '';
+      const cancelBtn  = o.status==='new' ? '<button class="btn btn-d btn-sm" onclick="cancelOrder('+o.id+')">❌</button>' : '';
+      return `<tr>
       <td style="color:var(--text-m)">#${String(o.id).slice(-6)}</td>
       <td><div style="font-weight:500">${o.name||''} ${o.lastname||''}</div><div style="font-size:11px;color:var(--text-m)">${o.phone||''}</div></td>
       <td style="font-size:12px;color:var(--text-s);max-width:180px">${(o.items||[]).map(i=>i.name+' р.'+i.size).join(', ')}</td>
@@ -601,11 +615,12 @@ function renderOrders(){
       <td><span class="os os-${o.status}">${statusLabel(o.status)}</span></td>
       <td><div class="actions">
         <button class="btn btn-g btn-sm" onclick="openOrder(${o.id})">👁</button>
-        ${o.status==='new'?`<button class="btn btn-p btn-sm" onclick="confirmOrder(${o.id})">✅</button>`:''}
-        ${o.status==='new'?`<button class="btn btn-d btn-sm" onclick="cancelOrder(${o.id})">❌</button>`:''}
+        ${confirmBtn}
+        ${cancelBtn}
         <button class="btn btn-g btn-sm" onclick="deleteOrder(${o.id})">🗑</button>
       </div></td>
-    </tr>`).join('')+'</tbody></table></div>';
+    </tr>`;
+    }).join('')+'</tbody></table></div>';
 }
 
 function openOrder(id){
@@ -683,22 +698,34 @@ function renderReviews(){
     el.innerHTML='<div class="empty"><div class="empty-ic">⭐</div><div class="empty-t">Отзывов пока нет</div></div>';
     return;
   }
-  const catMap = {};
-  products.forEach(p=>catMap[String(p.id)]=p.name);
+  const prodMap = {};
+  products.forEach(p=>prodMap[String(p.id)]=p);
   el.innerHTML='<div class="tw"><table><thead><tr><th>Товар</th><th>Покупатель</th><th>Оценка</th><th>Отзыв</th><th>Дата</th><th>Статус</th><th>Действия</th></tr></thead><tbody>'+
-    [...reviews].reverse().map(r=>`<tr>
-      <td style="font-size:12px;max-width:120px">${catMap[r.productId]||'—'}</td>
+    [...reviews].reverse().map(r=>{
+      const p = prodMap[r.productId]||{};
+      const photo = (p.photos&&p.photos[0])||p.photo||'';
+      const photoHtml = photo ? '<img src="'+photo+'" alt="" style="width:100%;height:100%;object-fit:cover">' : '👞';
+      return `<tr>
+      <td>
+        <div class="pc">
+          <div class="pt">${photoHtml}</div>
+          <div>
+            <div class="pn" style="font-size:12px">${p.name||'—'}</div>
+            <div class="ps">${p.color||''} ${p.art?'· Арт. '+p.art:''}</div>
+          </div>
+        </div>
+      </td>
       <td><div style="font-weight:500;font-size:13px">${r.name||'—'}</div><div style="font-size:11px;color:var(--text-m)">${r.tgId?'ID: '+r.tgId:''}</div></td>
       <td style="color:var(--gold);font-size:16px">${'★'.repeat(r.rating||5)}</td>
       <td style="font-size:12px;color:var(--text-s);max-width:200px">${r.text||''}</td>
       <td style="font-size:11px;color:var(--text-m)">${r.dateStr||''}</td>
       <td><span class="badge ${r.active===false?'badge-r':'badge-g'}">${r.active===false?'⏳ Модерация':'✅ Опубликован'}</span></td>
       <td><div class="actions">
-        ${r.active===false?`<button class="btn btn-p btn-sm" onclick="approveReview(${r.id})">✅</button>`:''}
-        ${r.active!==false?`<button class="btn btn-g btn-sm" onclick="hideReview(${r.id})">🙈</button>`:''}
+        ${r.active===false?'<button class="btn btn-p btn-sm" onclick="approveReview('+r.id+')">✅</button>':''}
+        ${r.active!==false?'<button class="btn btn-g btn-sm" onclick="hideReview('+r.id+')">🙈</button>':''}
         <button class="btn btn-d btn-sm" onclick="deleteReview(${r.id})">🗑</button>
       </div></td>
-    </tr>`).join('')+'</tbody></table></div>';
+    </tr>`;}).join('')+'</tbody></table></div>';
 }
 
 function approveReview(id){
@@ -724,9 +751,25 @@ function openAddReview(){
   document.getElementById('rv-rating').value = '5';
   document.getElementById('rv-text').value = '';
   document.getElementById('rv-active').checked = true;
+  document.getElementById('rv-product-preview').style.display = 'none';
   document.getElementById('mo-review').classList.add('on');
+  setTimeout(previewRvProduct, 50);
 }
 function closeMoReview(){ document.getElementById('mo-review').classList.remove('on'); }
+function previewRvProduct(){
+  const id = document.getElementById('rv-product').value;
+  const p = products.find(x=>String(x.id)===String(id));
+  if(!p) return;
+  const preview = document.getElementById('rv-product-preview');
+  const imgEl = document.getElementById('rv-preview-img');
+  const nameEl = document.getElementById('rv-preview-name');
+  const artEl = document.getElementById('rv-preview-art');
+  preview.style.display = 'block';
+  const photo = (p.photos&&p.photos[0])||p.photo||'';
+  imgEl.innerHTML = photo ? '<img src="'+photo+'" alt="" style="width:100%;height:100%;object-fit:cover">' : '👞';
+  nameEl.textContent = p.name + (p.color ? ' · '+p.color : '');
+  artEl.textContent = p.art ? 'Арт. '+p.art : '';
+}
 function saveReview(){
   const name = document.getElementById('rv-name').value.trim();
   const text = document.getElementById('rv-text').value.trim();
