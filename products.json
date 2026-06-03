@@ -229,5 +229,40 @@
     "reviews": 0,
     "active": true,
     "id": 1780504926976
+  },
+  {
+    "name": "Лоферы летние замшевые",
+    "cat": "loafers",
+    "catName": "Лоферы · Кожа",
+    "color": "Серо-синий",
+    "material": "Натуральная замша",
+    "price": 5300,
+    "old": 16700,
+    "wb": 7300,
+    "disc": 68,
+    "sizes": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45
+    ],
+    "art": "844798821",
+    "photo": "https://basket-38.wbcontent.net/vol8447/part844798/844798821/images/hq/1.webp",
+    "photos": [
+      "https://basket-38.wbcontent.net/vol8447/part844798/844798821/images/hq/1.webp",
+      "https://basket-38.wbcontent.net/vol8447/part844798/844798821/images/hq/3.webp",
+      "https://basket-38.wbcontent.net/vol8447/part844798/844798821/images/hq/4.webp",
+      "https://basket-38.wbcontent.net/vol8447/part844798/844798821/images/hq/5.webp",
+      "https://basket-38.wbcontent.net/vol8447/part844798/844798821/images/hq/6.webp",
+      "https://basket-38.wbcontent.net/vol8447/part844798/844798821/images/hq/11.webp",
+      "https://basket-38.wbcontent.net/vol8447/part844798/844798821/images/hq/12.webp"
+    ],
+    "desc": "",
+    "rating": 4.7,
+    "reviews": 0,
+    "active": true,
+    "id": 1780505102446
   }
 ]
