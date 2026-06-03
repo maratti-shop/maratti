@@ -357,6 +357,7 @@ let cart = [];
 let selSize = null;
 let curProduct = null;
 let selDel_ = 'ozon';
+let galleryIndex = 0;
 
 // ── LOAD ──
 async function loadProducts(){
@@ -441,11 +442,21 @@ function renderFavorites(){
 function openProduct(id){
   curProduct = PRODUCTS.find(p=>p.id===id);
   if(!curProduct) return;
-  selSize = null;
+  selSize = null; galleryIndex = 0; // reset
   const p = curProduct;
   const disc = p.old&&p.price ? Math.round((1-p.price/p.old)*100) : (p.disc||0);
   const wb = p.wb||0;
-  const img = p.photo ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover" loading="lazy">` : `<span class="ph" style="font-size:80px;opacity:.3">👞</span>`;
+  // Галерея фото
+  const photos = p.photos&&p.photos.length ? p.photos : (p.photo ? [p.photo] : []);
+  const galleryHtml = photos.length
+    ? photos.map((src,i)=>`<img class="gallery-img${i===0?' active':''}" src="${src}" alt="${p.name}" loading="lazy">`).join('')
+    : `<div class="gallery-ph">👞</div>`;
+  const arrowsHtml = photos.length>1
+    ? `<div class="gallery-arr left" onclick="prevGallery()">&#8249;</div><div class="gallery-arr right" onclick="nextGallery()">&#8250;</div>`
+    : '';
+  const dotsHtml = photos.length>1
+    ? photos.map((_,i)=>`<div class="gdot${i===0?' on':''}" onclick="goGallery(${i})"></div>`).join('')
+    : '';
   document.getElementById('mo-box').innerHTML = `
     <div class="gallery" id="mo-gallery">
       ${galleryHtml}
@@ -470,7 +481,7 @@ function openProduct(id){
       ${p.art?`<div class="mo-desc" style="font-size:11px;color:var(--text-m)">Арт. ${p.art}</div>`:''}
     </div>
     <button class="btn-share" onclick="shareProduct(${JSON.stringify(p.id)})">📤 Поделиться товаром</button>
-    <button class="btn-buy" onclick="addToCart()">🛍 В корзину</button>\`;
+    <button class="btn-buy" onclick="addToCart()">🛍 В корзину</button>`;
   document.getElementById('mo').classList.add('on');
   document.body.style.overflow='hidden';
 }
