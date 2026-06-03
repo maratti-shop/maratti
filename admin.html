@@ -196,6 +196,7 @@
         <div class="ni on" onclick="goPage('dashboard')"><span class="ic">📊</span>Дашборд</div>
         <div class="ni" onclick="goPage('products')"><span class="ic">👞</span>Товары</div>
         <div class="ni" onclick="goPage('orders')"><span class="ic">📦</span>Заказы<span class="badge-new" id="nb">0</span></div>
+        <div class="ni" onclick="goPage('reviews')"><span class="ic">⭐</span>Отзывы<span class="badge-new" id="rb" style="display:none">0</span></div>
         <div class="ni" onclick="goPage('settings')"><span class="ic">⚙️</span>Настройки</div>
       </div>
       <div class="sb-bottom"><div class="logout" onclick="logout()">🚪 Выйти</div></div>
@@ -238,6 +239,18 @@
           <button class="btn btn-g" onclick="loadOrders()">🔄 Обновить</button>
         </div>
         <div class="mbody"><div id="o-table"></div></div>
+      </div>
+
+      <!-- REVIEWS -->
+      <div class="page" id="page-reviews">
+        <div class="mhdr">
+          <div><div class="mhdr-t">Отзывы</div><div class="mhdr-s" id="rv-count">Нет отзывов</div></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-g" onclick="loadReviews()">🔄 Обновить</button>
+            <button class="btn btn-save" onclick="saveReviewsToGitHub()">🚀 Сохранить</button>
+          </div>
+        </div>
+        <div class="mbody"><div id="rv-table"></div></div>
       </div>
 
       <!-- SETTINGS -->
@@ -339,6 +352,7 @@ function goPage(page){
   document.querySelectorAll('.ni').forEach(n=>{ if(n.textContent.trim().startsWith(page==='dashboard'?'📊':page==='products'?'👞':page==='orders'?'📦':'⚙️')) n.classList.add('on'); });
   if(page==='products') renderProducts();
   if(page==='orders') renderOrders();
+  if(page==='reviews') renderReviews();
   if(page==='dashboard') renderDashboard();
   if(page==='settings'){ const t=getToken(); if(t) document.getElementById('s-token').value=t; }
 }
@@ -591,6 +605,74 @@ function saveSettings(){ const t=document.getElementById('s-token').value.trim()
 function changePwd(){ const p=document.getElementById('s-pwd').value; if(p.length<4){ alert('Минимум 4 символа'); return; } localStorage.setItem('admin_pwd',p); document.getElementById('s-pwd').value=''; showNotif('✅ Пароль изменён!'); }
 
 // ── INIT ──
+// ── REVIEWS ──
+async function loadReviews(){
+  if(!getToken()){ reviews=JSON.parse(localStorage.getItem('maratti_reviews')||'[]'); renderReviews(); return; }
+  showNotif('⏳ Загружаю отзывы...');
+  try {
+    const fd = await ghGet('reviews.json');
+    reviews = JSON.parse(fromBase64(fd.content));
+    if(!Array.isArray(reviews)) reviews=[];
+    localStorage.setItem('maratti_reviews',JSON.stringify(reviews));
+    renderReviews(); renderDashboard();
+    showNotif('✅ Отзывы загружены!');
+  } catch(e){ reviews=JSON.parse(localStorage.getItem('maratti_reviews')||'[]'); renderReviews(); }
+}
+
+async function saveReviewsToGitHub(){
+  if(!getToken()){ showNotif('❌ Введи токен в Настройках!'); return; }
+  showNotif('⏳ Сохраняю...');
+  try {
+    const fd = await ghGet('reviews.json');
+    await ghPut('reviews.json', reviews, fd.sha, 'update reviews');
+    showNotif('✅ Отзывы сохранены!');
+  } catch(e){ showNotif('❌ Ошибка: '+e.message); }
+}
+
+function renderReviews(){
+  const pending = reviews.filter(r=>r.active===false).length;
+  const rb = document.getElementById('rb');
+  if(pending){ rb.style.display='inline'; rb.textContent=pending; } else { rb.style.display='none'; }
+  document.getElementById('rv-count').textContent = reviews.length ? reviews.length+' отзывов ('+pending+' на модерации)' : 'Нет отзывов';
+  const el = document.getElementById('rv-table');
+  if(!el) return;
+  if(!reviews.length){
+    el.innerHTML='<div class="empty"><div class="empty-ic">⭐</div><div class="empty-t">Отзывов пока нет</div></div>';
+    return;
+  }
+  const catMap = {};
+  products.forEach(p=>catMap[String(p.id)]=p.name);
+  el.innerHTML='<div class="tw"><table><thead><tr><th>Товар</th><th>Покупатель</th><th>Оценка</th><th>Отзыв</th><th>Дата</th><th>Статус</th><th>Действия</th></tr></thead><tbody>'+
+    [...reviews].reverse().map(r=>`<tr>
+      <td style="font-size:12px;max-width:120px">${catMap[r.productId]||'—'}</td>
+      <td><div style="font-weight:500;font-size:13px">${r.name||'—'}</div><div style="font-size:11px;color:var(--text-m)">${r.tgId?'ID: '+r.tgId:''}</div></td>
+      <td style="color:var(--gold);font-size:16px">${'★'.repeat(r.rating||5)}</td>
+      <td style="font-size:12px;color:var(--text-s);max-width:200px">${r.text||''}</td>
+      <td style="font-size:11px;color:var(--text-m)">${r.dateStr||''}</td>
+      <td><span class="badge ${r.active===false?'badge-r':'badge-g'}">${r.active===false?'⏳ Модерация':'✅ Опубликован'}</span></td>
+      <td><div class="actions">
+        ${r.active===false?`<button class="btn btn-p btn-sm" onclick="approveReview(${r.id})">✅</button>`:''}
+        ${r.active!==false?`<button class="btn btn-g btn-sm" onclick="hideReview(${r.id})">🙈</button>`:''}
+        <button class="btn btn-d btn-sm" onclick="deleteReview(${r.id})">🗑</button>
+      </div></td>
+    </tr>`).join('')+'</tbody></table></div>';
+}
+
+function approveReview(id){
+  const r=reviews.find(x=>x.id===id);
+  if(r){ r.active=true; localStorage.setItem('maratti_reviews',JSON.stringify(reviews)); saveReviewsToGitHub(); renderReviews(); showNotif('✅ Отзыв опубликован!'); }
+}
+function hideReview(id){
+  const r=reviews.find(x=>x.id===id);
+  if(r){ r.active=false; localStorage.setItem('maratti_reviews',JSON.stringify(reviews)); saveReviewsToGitHub(); renderReviews(); showNotif('🙈 Отзыв скрыт'); }
+}
+function deleteReview(id){
+  if(!confirm('Удалить отзыв?')) return;
+  reviews=reviews.filter(x=>x.id!==id);
+  localStorage.setItem('maratti_reviews',JSON.stringify(reviews));
+  saveReviewsToGitHub(); renderReviews(); showNotif('🗑 Отзыв удалён');
+}
+
 function toggleSidebar(){
   document.querySelector('.sidebar').classList.toggle('open');
   document.getElementById('overlay-bg').style.display =
@@ -612,6 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function init(){
   products=JSON.parse(localStorage.getItem('maratti_products')||'[]');
   orders=JSON.parse(localStorage.getItem('maratti_orders')||'[]');
+  reviews=JSON.parse(localStorage.getItem('maratti_reviews')||'[]');
   renderDashboard(); renderProducts();
   const t=getToken(); if(t) document.getElementById('s-token').value=t;
   if(getToken()) loadOrders();

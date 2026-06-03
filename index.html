@@ -158,6 +158,26 @@
     .empty-s{font-size:13px;line-height:1.6}
     .gold-line{height:1px;background:linear-gradient(90deg,transparent,var(--gold-d),transparent);margin:4px 16px}
 
+    /* REVIEWS */
+    .reviews-wrap{padding:0 18px 16px}
+    .review-item{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:10px}
+    .review-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    .review-name{font-size:13px;font-weight:600;color:var(--text)}
+    .review-date{font-size:11px;color:var(--text-m)}
+    .review-stars{color:var(--gold);font-size:14px;margin-bottom:6px}
+    .review-text{font-size:13px;color:var(--text-s);line-height:1.6}
+    .review-form{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:16px;margin:0 18px 16px}
+    .review-form-title{font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:12px}
+    .stars-select{display:flex;gap:6px;margin-bottom:12px}
+    .star-btn{font-size:28px;cursor:pointer;opacity:.3;transition:opacity .15s}
+    .star-btn.on{opacity:1}
+    .review-textarea{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--text);outline:none;font-family:inherit;resize:none;min-height:80px}
+    .review-textarea:focus{border-color:var(--green-l)}
+    .review-textarea::placeholder{color:var(--text-m)}
+    .btn-review{width:100%;padding:12px;background:linear-gradient(135deg,#1a4a1a,#2d7a2d);color:var(--gold);border:1px solid var(--gold-d);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px}
+    .btn-review:active{opacity:.8}
+    .reviews-empty{text-align:center;padding:20px;color:var(--text-m);font-size:13px}
+
     /* GALLERY */
     .gallery{position:relative;background:var(--card2);aspect-ratio:1;overflow:hidden}
     .gallery-img{width:100%;height:100%;object-fit:cover;display:none;position:absolute;inset:0}
@@ -479,11 +499,29 @@ function openProduct(id){
       <div class="mo-sec">Описание</div>
       <div class="mo-desc">${p.desc||'Премиум обувь из натуральной кожи MARATTI.'}</div>
       ${p.art?`<div class="mo-desc" style="font-size:11px;color:var(--text-m)">Арт. ${p.art}</div>`:''}
+      <div class="mo-sec">Отзывы</div>
+      <div id="mo-reviews">
+        <div class="reviews-empty">⏳ Загрузка отзывов...</div>
+      </div>
+      <div class="review-form" id="mo-review-form">
+        <div class="review-form-title">Оставить отзыв</div>
+        <div class="stars-select" id="star-select">
+          <span class="star-btn" data-v="1" onclick="selectStar(1)">★</span>
+          <span class="star-btn" data-v="2" onclick="selectStar(2)">★</span>
+          <span class="star-btn" data-v="3" onclick="selectStar(3)">★</span>
+          <span class="star-btn" data-v="4" onclick="selectStar(4)">★</span>
+          <span class="star-btn" data-v="5" onclick="selectStar(5)">★</span>
+        </div>
+        <textarea class="review-textarea" id="review-text" placeholder="Расскажите о товаре — качество, размер, соответствие описанию..." rows="3"></textarea>
+        <button class="btn-review" onclick="submitReview(${JSON.stringify(p.id)})">✅ Отправить отзыв</button>
+      </div>
     </div>
     <button class="btn-share" onclick="shareProduct(${JSON.stringify(p.id)})">📤 Поделиться товаром</button>
     <button class="btn-buy" onclick="addToCart()">🛍 В корзину</button>`;
   document.getElementById('mo').classList.add('on');
   document.body.style.overflow='hidden';
+  // Загружаем отзывы
+  loadReviews(p.id);
 }
 function closeMo(){ document.getElementById('mo').classList.remove('on'); document.body.style.overflow=''; }
 function selSz(s,el){ selSize=s; document.querySelectorAll('.sz').forEach(x=>x.classList.remove('on')); el.classList.add('on'); }
@@ -797,6 +835,103 @@ function formatPhone(input){
       hint.style.color = '';
     }
   }
+}
+
+// ── REVIEWS ──
+let allReviews = [];
+let selectedStar = 0;
+
+async function loadReviews(productId){
+  const el = document.getElementById('mo-reviews');
+  if(!el) return;
+  try {
+    if(!allReviews.length){
+      const r = await fetch(GITHUB_RAW+'reviews.json?t='+Date.now());
+      const d = await r.json();
+      allReviews = Array.isArray(d) ? d : [];
+    }
+    const pReviews = allReviews.filter(rv=>String(rv.productId)===String(productId) && rv.active!==false);
+    if(!pReviews.length){
+      el.innerHTML = '<div class="reviews-empty">Пока нет отзывов. Будьте первым! 👆</div>';
+      return;
+    }
+    // Сортируем по дате — новые сверху
+    pReviews.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    el.innerHTML = pReviews.map(rv=>`
+      <div class="review-item">
+        <div class="review-header">
+          <div class="review-name">${rv.name||'Покупатель'}</div>
+          <div class="review-date">${rv.dateStr||''}</div>
+        </div>
+        <div class="review-stars">${'★'.repeat(rv.rating||5)}${'☆'.repeat(5-(rv.rating||5))}</div>
+        <div class="review-text">${rv.text||''}</div>
+      </div>`).join('');
+  } catch(e){
+    el.innerHTML = '<div class="reviews-empty">Нет отзывов</div>';
+  }
+}
+
+function selectStar(n){
+  selectedStar = n;
+  document.querySelectorAll('.star-btn').forEach((btn,i)=>{
+    btn.classList.toggle('on', i < n);
+  });
+}
+
+async function submitReview(productId){
+  if(!selectedStar){ tg.showAlert('Поставьте оценку!'); return; }
+  const text = (document.getElementById('review-text').value||'').trim();
+  if(!text){ tg.showAlert('Напишите отзыв!'); return; }
+
+  const u = tg.initDataUnsafe?.user;
+  const name = u ? (u.first_name||'Покупатель') : 'Покупатель';
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ru-RU', {day:'numeric',month:'long',year:'numeric'});
+
+  const review = {
+    id: Date.now(),
+    productId: String(productId),
+    name,
+    tgId: u?.id||'',
+    rating: selectedStar,
+    text,
+    date: now.toISOString(),
+    dateStr,
+    active: false // ждёт модерации
+  };
+
+  // Отправляем уведомление владельцу
+  const p = PRODUCTS.find(x=>String(x.id)===String(productId));
+  const msg = `⭐ Новый отзыв на модерации!
+
+`+
+    `👞 Товар: ${p?p.name:'—'}
+`+
+    `👤 ${name} (TG: ${u?.username?'@'+u.username:u?.id||'—'})
+`+
+    `⭐ Оценка: ${'★'.repeat(selectedStar)}
+`+
+    `💬 ${text}
+
+`+
+    `📋 Одобри или удали в админке:
+`+
+    `https://maratti-shop.github.io/maratti/admin.html`;
+
+  try {
+    await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({chat_id: OWNER_ID, text: msg})
+    });
+    allReviews.push(review);
+  } catch(e){ console.log('review send err',e); }
+
+  // Сбрасываем форму
+  selectedStar = 0;
+  document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('review-text').value = '';
+  document.getElementById('mo-review-form').innerHTML =
+    '<div style="text-align:center;padding:16px;color:var(--green-b);font-family:Georgia,serif">✅ Отзыв отправлен на модерацию!<br><span style="font-size:12px;color:var(--text-m)">Появится после проверки</span></div>';
 }
 
 // ── INIT ──
