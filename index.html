@@ -157,6 +157,22 @@
     .empty-t{font-family:Georgia,serif;font-size:17px;margin-bottom:6px;color:var(--text-s)}
     .empty-s{font-size:13px;line-height:1.6}
     .gold-line{height:1px;background:linear-gradient(90deg,transparent,var(--gold-d),transparent);margin:4px 16px}
+
+    /* GALLERY */
+    .gallery{position:relative;background:var(--card2);aspect-ratio:1;overflow:hidden}
+    .gallery-img{width:100%;height:100%;object-fit:cover;display:none;position:absolute;inset:0}
+    .gallery-img.active{display:block}
+    .gallery-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:80px;opacity:.3}
+    .gallery-dots{position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:6px;z-index:2}
+    .gdot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:all .2s}
+    .gdot.on{background:var(--gold);width:20px;border-radius:4px}
+    .gallery-arr{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;background:rgba(10,15,10,.7);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;font-size:16px;color:var(--text-s)}
+    .gallery-arr.left{left:10px}
+    .gallery-arr.right{right:10px}
+
+    /* SHARE */
+    .btn-share{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:transparent;color:var(--text-s);border:1px solid var(--border2);border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;margin-top:10px;transition:all .15s}
+    .btn-share:active{background:var(--card2);color:var(--gold)}
     .promo-code-w{padding:0 16px;margin-bottom:8px}
     .promo-code-row{display:flex;gap:8px}
     .promo-inp{flex:1;background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--text);outline:none;font-family:inherit;text-transform:uppercase}
@@ -431,7 +447,12 @@ function openProduct(id){
   const wb = p.wb||0;
   const img = p.photo ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover" loading="lazy">` : `<span class="ph" style="font-size:80px;opacity:.3">👞</span>`;
   document.getElementById('mo-box').innerHTML = `
-    <div class="mo-img">${img}<div class="mo-close" onclick="closeMo()">×</div></div>
+    <div class="gallery" id="mo-gallery">
+      ${galleryHtml}
+      <div class="mo-close" onclick="closeMo()" style="position:absolute;top:14px;right:14px;width:34px;height:34px;background:rgba(10,15,10,.9);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--text);cursor:pointer;z-index:3">×</div>
+      ${arrowsHtml}
+      <div class="gallery-dots" id="mo-dots">${dotsHtml}</div>
+    </div>
     <div class="mo-body">
       <div class="mo-cat">${p.catName||p.cat}${p.color?' · '+p.color:''}</div>
       <div class="mo-name">${p.name}</div>
@@ -448,7 +469,8 @@ function openProduct(id){
       <div class="mo-desc">${p.desc||'Премиум обувь из натуральной кожи MARATTI.'}</div>
       ${p.art?`<div class="mo-desc" style="font-size:11px;color:var(--text-m)">Арт. ${p.art}</div>`:''}
     </div>
-    <button class="btn-buy" onclick="addToCart()">🛍 В корзину</button>`;
+    <button class="btn-share" onclick="shareProduct(${JSON.stringify(p.id)})">📤 Поделиться товаром</button>
+    <button class="btn-buy" onclick="addToCart()">🛍 В корзину</button>\`;
   document.getElementById('mo').classList.add('on');
   document.body.style.overflow='hidden';
 }
@@ -677,6 +699,38 @@ function updateCartTotal(){
       `<div class="f-sum-item"><span>Доставка</span><span>${del===0?'Бесплатно':fmt(del)+' ₽'}</span></div>`+
       (disc?`<div class="f-sum-item" style="color:var(--green-b)"><span>Промокод ${appliedPromo.code}</span><span>−${fmt(disc)} ₽</span></div>`:'')+
       `<div class="f-sum-total">Итого: ${fmt(total)} ₽</div>`;
+  }
+}
+
+// ── GALLERY ──
+function goGallery(idx){
+  const imgs = document.querySelectorAll('#mo-gallery .gallery-img');
+  const dots = document.querySelectorAll('#mo-dots .gdot');
+  if(!imgs.length) return;
+  idx = (idx+imgs.length)%imgs.length;
+  galleryIndex = idx;
+  imgs.forEach((im,i)=>im.classList.toggle('active',i===idx));
+  dots.forEach((d,i)=>d.classList.toggle('on',i===idx));
+}
+function nextGallery(){ goGallery(galleryIndex+1); }
+function prevGallery(){ goGallery(galleryIndex-1); }
+
+// ── SHARE ──
+function shareProduct(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  const text = `👞 ${p.name}\n💰 ${p.price} ₽ (на WB: ${p.wb||''} ₽)\n\nSMARATTI — премиум обувь из натуральной кожи\n@maratti_shop_bot`;
+  if(tg.switchInlineQuery){
+    tg.switchInlineQuery(p.name);
+  } else if(navigator.share){
+    navigator.share({title:'MARATTI — '+p.name, text, url:'https://t.me/maratti_shop_bot'});
+  } else if(tg.openTelegramLink){
+    tg.openTelegramLink('https://t.me/share/url?url=https://t.me/maratti_shop_bot&text='+encodeURIComponent(text));
+  } else {
+    // Копируем в буфер
+    navigator.clipboard?.writeText('https://t.me/maratti_shop_bot').then(()=>{
+      tg.showAlert('Ссылка скопирована!\n\nОтправь другу: https://t.me/maratti_shop_bot');
+    }).catch(()=>tg.showAlert('Поделись ботом: @maratti_shop_bot'));
   }
 }
 
