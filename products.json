@@ -154,6 +154,14 @@
     "rating": 4.7,
     "reviews": 0,
     "active": true,
-    "id": 1780473230893
+    "id": 1780473230893,
+    "photos": [
+      "https://basket-40.wbcontent.net/vol9174/part917449/917449732/images/hq/3.webp",
+      "https://basket-40.wbcontent.net/vol9174/part917449/917449732/images/hq/1.webp",
+      "https://basket-40.wbcontent.net/vol9174/part917449/917449732/images/hq/2.webp",
+      "https://basket-40.wbcontent.net/vol9174/part917449/917449732/images/hq/4.webp",
+      "https://basket-40.wbcontent.net/vol9174/part917449/917449732/images/hq/7.webp",
+      "https://basket-40.wbcontent.net/vol9174/part917449/917449732/images/hq/8.webp"
+    ]
   }
 ]
