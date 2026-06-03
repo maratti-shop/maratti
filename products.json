@@ -163,5 +163,38 @@
       "https://basket-40.wbcontent.net/vol9174/part917449/917449732/images/hq/7.webp",
       "https://basket-40.wbcontent.net/vol9174/part917449/917449732/images/hq/8.webp"
     ]
+  },
+  {
+    "name": "Кеды натуральная кожа",
+    "cat": "sneakers",
+    "catName": "Кеды",
+    "color": "Белый-бежевый",
+    "material": "Натуральная кожа",
+    "price": 5230,
+    "old": 17634,
+    "wb": 6900,
+    "disc": 70,
+    "sizes": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45
+    ],
+    "art": "917449729",
+    "photo": "https://basket-40.wbcontent.net/vol9174/part917449/917449729/images/hq/4.webp",
+    "photos": [
+      "https://basket-40.wbcontent.net/vol9174/part917449/917449729/images/hq/4.webp",
+      "https://basket-40.wbcontent.net/vol9174/part917449/917449729/images/hq/5.webp",
+      "https://basket-40.wbcontent.net/vol9174/part917449/917449729/images/hq/6.webp",
+      "https://basket-40.wbcontent.net/vol9174/part917449/917449729/images/hq/8.webp",
+      "https://basket-40.wbcontent.net/vol9174/part917449/917449729/images/hq/14.webp"
+    ],
+    "desc": "",
+    "rating": 4.9,
+    "reviews": 0,
+    "active": true,
+    "id": 1780504736494
   }
 ]
