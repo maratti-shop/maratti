@@ -245,8 +245,9 @@
       <div class="page" id="page-reviews">
         <div class="mhdr">
           <div><div class="mhdr-t">Отзывы</div><div class="mhdr-s" id="rv-count">Нет отзывов</div></div>
-          <div style="display:flex;gap:10px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn btn-g" onclick="loadReviews()">🔄 Обновить</button>
+            <button class="btn btn-p" onclick="openAddReview()">+ Добавить</button>
             <button class="btn btn-save" onclick="saveReviewsToGitHub()">🚀 Сохранить</button>
           </div>
         </div>
@@ -310,6 +311,48 @@
     <div class="mo-hdr"><div class="mo-t">Детали заказа</div><div class="mo-close" onclick="closeMoOrder()">×</div></div>
     <div class="mo-body" id="mo-o-body"></div>
     <div class="mo-foot"><button class="btn btn-g" onclick="closeMoOrder()">Закрыть</button><button class="btn btn-p" id="mo-o-confirm" style="display:none" onclick="confirmFromModal()">✅ Подтвердить</button></div>
+  </div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div class="mo" id="mo-review" onclick="if(event.target===this)closeMoReview()">
+  <div class="mo-box" style="max-width:480px">
+    <div class="mo-hdr">
+      <div class="mo-t">Добавить отзыв</div>
+      <div class="mo-close" onclick="closeMoReview()">×</div>
+    </div>
+    <div class="mo-body">
+      <div class="fg">
+        <label class="fl">Товар *</label>
+        <select class="fsel" id="rv-product"></select>
+      </div>
+      <div class="fg">
+        <label class="fl">Имя покупателя *</label>
+        <input class="fi" id="rv-name" placeholder="Иван">
+      </div>
+      <div class="fg">
+        <label class="fl">Оценка *</label>
+        <select class="fsel" id="rv-rating">
+          <option value="5">★★★★★ — 5</option>
+          <option value="4">★★★★☆ — 4</option>
+          <option value="3">★★★☆☆ — 3</option>
+          <option value="2">★★☆☆☆ — 2</option>
+          <option value="1">★☆☆☆☆ — 1</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">Текст отзыва *</label>
+        <textarea class="fta" id="rv-text" placeholder="Отличное качество, размер соответствует..."></textarea>
+      </div>
+      <div class="fg" style="display:flex;align-items:center;gap:12px">
+        <label class="toggle"><input type="checkbox" id="rv-active" checked><span class="tsl"></span></label>
+        <span style="font-size:14px;color:var(--text-s)">Сразу опубликовать</span>
+      </div>
+    </div>
+    <div class="mo-foot">
+      <button class="btn btn-g" onclick="closeMoReview()">Отмена</button>
+      <button class="btn btn-p" onclick="saveReview()">Сохранить</button>
+    </div>
   </div>
 </div>
 
@@ -671,6 +714,42 @@ function deleteReview(id){
   reviews=reviews.filter(x=>x.id!==id);
   localStorage.setItem('maratti_reviews',JSON.stringify(reviews));
   saveReviewsToGitHub(); renderReviews(); showNotif('🗑 Отзыв удалён');
+}
+
+function openAddReview(){
+  // Заполняем список товаров
+  const sel = document.getElementById('rv-product');
+  sel.innerHTML = products.map(p=>`<option value="${p.id}">${p.name} (${p.color||''})</option>`).join('');
+  document.getElementById('rv-name').value = '';
+  document.getElementById('rv-rating').value = '5';
+  document.getElementById('rv-text').value = '';
+  document.getElementById('rv-active').checked = true;
+  document.getElementById('mo-review').classList.add('on');
+}
+function closeMoReview(){ document.getElementById('mo-review').classList.remove('on'); }
+function saveReview(){
+  const name = document.getElementById('rv-name').value.trim();
+  const text = document.getElementById('rv-text').value.trim();
+  const productId = document.getElementById('rv-product').value;
+  const rating = parseInt(document.getElementById('rv-rating').value);
+  const active = document.getElementById('rv-active').checked;
+  if(!name){ alert('Введите имя'); return; }
+  if(!text){ alert('Введите текст отзыва'); return; }
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+  reviews.push({
+    id: Date.now(),
+    productId: String(productId),
+    name, rating, text, active,
+    date: now.toISOString(),
+    dateStr,
+    tgId: 'admin'
+  });
+  localStorage.setItem('maratti_reviews', JSON.stringify(reviews));
+  closeMoReview();
+  renderReviews();
+  saveReviewsToGitHub();
+  showNotif('✅ Отзыв добавлен!');
 }
 
 function toggleSidebar(){
