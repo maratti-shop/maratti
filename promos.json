@@ -1,12 +1,4 @@
 {
-  "promos": [
-    {
-      "code": "УМАРНОСТЬ",
-      "type": "fixed",
-      "value": 1725,
-      "until": "2026-06-28",
-      "active": true
-    }
-  ],
+  "promos": [],
   "promotion": null
 }
