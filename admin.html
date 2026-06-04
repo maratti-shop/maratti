@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MARATTI Admin</title>
   <style>
-    :root{--bg:#0a0e0c;--surface:#131b16;--card:#141d18;--card2:#1a2620;--green:#155741;--green-l:#1d7355;--green-b:#7d796e;--gold:#c9a76a;--gold-d:#a8884f;--gold-l:#e0c489;--text:#ece8df;--text-s:#b8b3a6;--text-m:#7d796e;--border:#22302a;--border2:#2d3d35;--red:#c25543;--red-d:#a8432e;--dark:#0a0e0c}
+    :root{--bg:#0a0e0c;--surface:#131b16;--card:#141d18;--card2:#1a2620;--green:#155741;--green-l:#1d7355;--green-b:#7d796e;--gold:#c9a76a;--gold-d:#a8884f;--gold-l:#e0c489;--text:#ece8df;--text-s:#b8b3a6;--text-m:#7d796e;--border:#22302a;--border2:#2d3d35;--red:#c25543;--red-d:#a8432e;--dark:#0a0e0c;--bg-glow:rgba(21,87,65,.18)}
+    [data-theme="light"]{--bg:#f4f0e8;--surface:#ffffff;--card:#ffffff;--card2:#f7f3ea;--green:#1f5641;--green-l:#338563;--green-b:#8a8273;--gold:#a8854a;--gold-d:#8c6d3a;--gold-l:#c19a55;--text:#211d16;--text-s:#534d42;--text-m:#8a8273;--border:#ece6d8;--border2:#ddd5c4;--red:#b5462f;--red-d:#9a3a26;--dark:#1f5641;--bg-glow:rgba(31,86,65,.06)}
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(21,87,65,.18),transparent 55%)}
+    body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;background-image:radial-gradient(ellipse 80% 50% at 50% 0%,var(--bg-glow),transparent 55%);transition:background-color .4s,color .4s}
+    .sidebar,.mhdr,.stat,.btn,.fi,.mo-box,.tw,table,tr{transition:background-color .4s,border-color .4s,color .4s}
 
     /* LOGIN */
     .login-w{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
@@ -198,6 +200,7 @@
         <div class="ni" onclick="goPage('orders')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>Заказы<span class="badge-new" id="nb">0</span></div>
         <div class="ni" onclick="goPage('reviews')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>Отзывы<span class="badge-new" id="rb" style="display:none">0</span></div>
         <div class="ni" onclick="goPage('promos')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>Промокоды</div>
+        <div class="ni" onclick="goPage('cats')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>Категории</div>
         <div class="ni" onclick="goPage('settings')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Настройки</div>
       </div>
       <div class="sb-bottom"><div class="logout" onclick="logout()">🚪 Выйти</div></div>
@@ -283,10 +286,34 @@
         </div>
       </div>
 
+      <!-- CATEGORIES -->
+      <div class="page" id="page-cats">
+        <div class="mhdr">
+          <div><div class="mhdr-t">Категории</div><div class="mhdr-s" id="ct-count">Управление категориями</div></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-g" onclick="loadCategories()">Обновить</button>
+            <button class="btn btn-p" onclick="openAddCat()">+ Категория</button>
+            <button class="btn btn-save" onclick="saveCatsToGitHub()">Сохранить</button>
+          </div>
+        </div>
+        <div class="mbody">
+          <div style="font-size:13px;color:var(--text-m);margin-bottom:16px;line-height:1.5">Категории отображаются в боте в виде фильтров и баннеров. ID — латиницей без пробелов (например: loafers). Используйте этот же ID в поле «Категория» при добавлении товара.</div>
+          <div id="ct-table"></div>
+        </div>
+      </div>
+
       <!-- SETTINGS -->
       <div class="page" id="page-settings">
         <div class="mhdr"><div><div class="mhdr-t">Настройки</div><div class="mhdr-s">Управление магазином</div></div></div>
         <div class="mbody">
+          <div class="tw" style="padding:24px;margin-bottom:16px">
+            <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:6px">Главная страница (баннер)</div>
+            <div style="font-size:12px;color:var(--text-m);margin-bottom:16px">Фото и текст большого баннера сверху в боте</div>
+            <div class="fg"><label class="fl">Фото баннера (ссылка)</label><input class="fi" id="s-hero-img" placeholder="https://..."><div class="fhint">Оставьте пустым — будет просто фон без фото</div></div>
+            <div class="fg"><label class="fl">Заголовок</label><input class="fi" id="s-hero-title" placeholder="MARATTI"></div>
+            <div class="fg"><label class="fl">Подпись под заголовком</label><input class="fi" id="s-hero-sub" placeholder="premium leather · since 2006"></div>
+            <button class="btn btn-save" onclick="saveHeroSettings()">Сохранить баннер</button>
+          </div>
           <div class="tw" style="padding:24px;margin-bottom:16px">
             <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:16px">Магазин</div>
             <div class="fg"><label class="fl">Телефон</label><input class="fi" value="+7 (989) 476-20-89" id="s-phone"></div>
@@ -424,6 +451,25 @@
   </div>
 </div>
 
+<!-- CATEGORY MODAL -->
+<div class="mo" id="mo-cat" onclick="if(event.target===this)closeMoCat()">
+  <div class="mo-box" style="max-width:420px">
+    <div class="mo-hdr">
+      <div class="mo-t">Новая категория</div>
+      <div class="mo-close" onclick="closeMoCat()">×</div>
+    </div>
+    <div class="mo-body">
+      <div class="fg"><label class="fl">Название *</label><input class="fi" id="cat-name" placeholder="Лоферы"></div>
+      <div class="fg"><label class="fl">ID (латиницей) *</label><input class="fi" id="cat-id" placeholder="loafers" style="text-transform:lowercase"><div class="fhint">Без пробелов. Этот ID указывайте в товаре в поле «Категория»</div></div>
+      <div class="fg"><label class="fl">Эмодзи (необязательно)</label><input class="fi" id="cat-emoji" placeholder="👞" maxlength="4"></div>
+    </div>
+    <div class="mo-foot">
+      <button class="btn btn-g" onclick="closeMoCat()">Отмена</button>
+      <button class="btn btn-p" onclick="saveCat()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
 <div class="notif" id="notif"></div>
 
 <script>
@@ -434,6 +480,7 @@ const GH_API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/cont
 
 let products = [];
 let promos = [];
+let categories = [];
 let promotion = null;
 let orders = [];
 let currentOrderId = null;
@@ -467,8 +514,9 @@ function goPage(page){
   if(page==='orders') renderOrders();
   if(page==='reviews') renderReviews();
   if(page==='promos') renderPromos();
+  if(page==='cats') renderCatsAdmin();
   if(page==='dashboard') renderDashboard();
-  if(page==='settings'){ const t=getToken(); if(t) document.getElementById('s-token').value=t; }
+  if(page==='settings'){ const t=getToken(); if(t) document.getElementById('s-token').value=t; loadHeroSettings(); }
 }
 
 // ── GITHUB ──
@@ -877,7 +925,138 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ── PROMOS ──
+// ── CATEGORIES ──
+async function loadCategories(){
+  if(!getToken()){
+    categories = JSON.parse(localStorage.getItem('maratti_categories')||'[]');
+    renderCatsAdmin(); return;
+  }
+  showNotif('Загружаю...');
+  try {
+    const fd = await ghGet('categories.json');
+    categories = JSON.parse(fromBase64(fd.content));
+    if(!Array.isArray(categories)) categories=[];
+    localStorage.setItem('maratti_categories', JSON.stringify(categories));
+    renderCatsAdmin();
+    showNotif('Категории загружены');
+  } catch(e){
+    categories = JSON.parse(localStorage.getItem('maratti_categories')||'[]');
+    renderCatsAdmin();
+  }
+}
+
+async function saveCatsToGitHub(){
+  if(!getToken()){ showNotif('Введи токен в Настройках!'); return; }
+  showNotif('Сохраняю...');
+  try {
+    let sha;
+    try { const fd = await ghGet('categories.json'); sha = fd.sha; } catch(e){ sha = undefined; }
+    await ghPut('categories.json', categories, sha, 'update categories');
+    localStorage.setItem('maratti_categories', JSON.stringify(categories));
+    showNotif('Категории сохранены!');
+  } catch(e){ showNotif('Ошибка: '+e.message); }
+}
+
+function renderCatsAdmin(){
+  const el = document.getElementById('ct-table');
+  if(!el) return;
+  const cntEl = document.getElementById('ct-count');
+  if(cntEl) cntEl.textContent = categories.length ? categories.length+' категорий' : 'Нет категорий';
+  if(!categories.length){
+    el.innerHTML = '<div class="empty"><div class="empty-t">Категорий пока нет</div></div>';
+    return;
+  }
+  const prodCount = {};
+  products.forEach(p=>{ prodCount[p.cat]=(prodCount[p.cat]||0)+1; });
+  el.innerHTML = '<div class="tw"><table><thead><tr><th>Категория</th><th>ID</th><th>Товаров</th><th>Действия</th></tr></thead><tbody>'+
+    categories.map((c,idx)=>{
+      return '<tr>'+
+        '<td style="font-weight:600">'+(c.emoji?c.emoji+' ':'')+c.name+'</td>'+
+        '<td style="font-size:12px;color:var(--text-m);font-family:monospace">'+c.id+'</td>'+
+        '<td>'+(prodCount[c.id]||0)+'</td>'+
+        '<td><div class="actions">'+
+        '<button class="btn btn-g btn-sm" onclick="moveCat('+idx+',-1)">↑</button>'+
+        '<button class="btn btn-g btn-sm" onclick="moveCat('+idx+',1)">↓</button>'+
+        '<button class="btn btn-d btn-sm" onclick="deleteCat('+idx+')">Удалить</button>'+
+        '</div></td></tr>';
+    }).join('')+'</tbody></table></div>';
+}
+
+function openAddCat(){
+  document.getElementById('cat-name').value='';
+  document.getElementById('cat-id').value='';
+  document.getElementById('cat-emoji').value='';
+  document.getElementById('mo-cat').classList.add('on');
+}
+function closeMoCat(){ document.getElementById('mo-cat').classList.remove('on'); }
+function saveCat(){
+  const name = document.getElementById('cat-name').value.trim();
+  const id = document.getElementById('cat-id').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');
+  const emoji = document.getElementById('cat-emoji').value.trim();
+  if(!name){ alert('Введите название'); return; }
+  if(!id){ alert('Введите ID латиницей'); return; }
+  if(categories.some(c=>c.id===id)){ alert('Категория с таким ID уже есть'); return; }
+  categories.push({id, name, emoji});
+  closeMoCat();
+  renderCatsAdmin();
+  saveCatsToGitHub();
+  showNotif('Категория добавлена!');
+}
+function deleteCat(idx){
+  const c = categories[idx];
+  const used = products.filter(p=>p.cat===c.id).length;
+  if(used>0){ if(!confirm('В этой категории '+used+' товаров. Они останутся, но категория пропадёт из фильтров. Удалить?')) return; }
+  else { if(!confirm('Удалить категорию «'+c.name+'»?')) return; }
+  categories.splice(idx,1);
+  renderCatsAdmin(); saveCatsToGitHub();
+  showNotif('Категория удалена');
+}
+function moveCat(idx, dir){
+  const ni = idx+dir;
+  if(ni<0 || ni>=categories.length) return;
+  [categories[idx], categories[ni]] = [categories[ni], categories[idx]];
+  renderCatsAdmin(); saveCatsToGitHub();
+}
+
+// ── HERO SETTINGS ──
+let heroSettings = {heroImage:'',heroTitle:'MARATTI',heroSubtitle:'premium leather · since 2006'};
+async function loadHeroSettings(){
+  if(!getToken()){
+    try{ heroSettings = JSON.parse(localStorage.getItem('maratti_hero')||'{}'); }catch(e){}
+    fillHeroFields(); return;
+  }
+  try {
+    const fd = await ghGet('settings.json');
+    heroSettings = JSON.parse(fromBase64(fd.content));
+    localStorage.setItem('maratti_hero', JSON.stringify(heroSettings));
+    fillHeroFields();
+  } catch(e){
+    try{ heroSettings = JSON.parse(localStorage.getItem('maratti_hero')||'{}'); }catch(e2){}
+    fillHeroFields();
+  }
+}
+function fillHeroFields(){
+  const i=document.getElementById('s-hero-img'); if(i) i.value=heroSettings.heroImage||'';
+  const t=document.getElementById('s-hero-title'); if(t) t.value=heroSettings.heroTitle||'';
+  const s=document.getElementById('s-hero-sub'); if(s) s.value=heroSettings.heroSubtitle||'';
+}
+async function saveHeroSettings(){
+  if(!getToken()){ showNotif('Введи токен в Настройках!'); return; }
+  heroSettings = {
+    heroImage: document.getElementById('s-hero-img').value.trim(),
+    heroTitle: document.getElementById('s-hero-title').value.trim()||'MARATTI',
+    heroSubtitle: document.getElementById('s-hero-sub').value.trim()
+  };
+  showNotif('Сохраняю...');
+  try {
+    let sha;
+    try { const fd = await ghGet('settings.json'); sha = fd.sha; } catch(e){ sha = undefined; }
+    await ghPut('settings.json', heroSettings, sha, 'update hero settings');
+    localStorage.setItem('maratti_hero', JSON.stringify(heroSettings));
+    showNotif('Баннер сохранён!');
+  } catch(e){ showNotif('Ошибка: '+e.message); }
+}
+
 async function loadPromos(){
   if(!getToken()){
     const local = localStorage.getItem('maratti_promos');
@@ -1000,9 +1179,10 @@ function init(){
   orders=JSON.parse(localStorage.getItem('maratti_orders')||'[]');
   reviews=JSON.parse(localStorage.getItem('maratti_reviews')||'[]');
   try{const pd=JSON.parse(localStorage.getItem('maratti_promos')||'{}');promos=pd.promos||[];promotion=pd.promotion||null;}catch(e){}
+  categories=JSON.parse(localStorage.getItem('maratti_categories')||'[]');
   renderDashboard(); renderProducts();
   const t=getToken(); if(t) document.getElementById('s-token').value=t;
-  if(getToken()) loadOrders();
+  if(getToken()){ loadOrders(); loadCategories(); }
 }
 </script>
 </body>
