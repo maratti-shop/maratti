@@ -1,12 +1,12 @@
 {
   "promos": [
-    {"code":"ИНСТА","type":"fixed","value":500,"active":true,"until":""},
-    {"code":"INSTA","type":"fixed","value":500,"active":true,"until":""},
-    {"code":"MARATTI","type":"fixed","value":500,"active":true,"until":""}
+    {
+      "code": "УМАРНОСТЬ",
+      "type": "fixed",
+      "value": 1725,
+      "until": "2026-06-28",
+      "active": true
+    }
   ],
-  "promotion": {
-    "title":"Промокод ИНСТА",
-    "text":"Скидка 500₽ на первый заказ по промокоду ИНСТА",
-    "active":true
-  }
+  "promotion": null
 }
