@@ -445,6 +445,16 @@ body{
     .product{--mx:50%;--my:50%}
     .product-img::after{content:'';position:absolute;inset:0;background:radial-gradient(circle 120px at var(--mx) var(--my),var(--lg-spot),transparent 70%);opacity:0;transition:opacity .3s;pointer-events:none;z-index:1}
     .product.lg-touch .product-img::after{opacity:1}
+
+    .pg-header{display:flex;align-items:center;gap:12px;padding:16px 18px;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:1px solid var(--line)}
+    .pg-back{background:none;border:none;cursor:pointer;color:var(--txt);padding:0;display:flex}
+    .my-order-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;animation:fadeUp .45s cubic-bezier(.16,1,.3,1)}
+    .my-order-num{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:4px}
+    .my-order-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin-bottom:10px}
+    .my-order-items{font-size:13px;color:var(--txt-2);margin-bottom:8px}
+    .my-order-total{font-size:16px;font-weight:700;color:var(--txt)}
+    .my-order-track{font-size:12px;color:var(--emerald-bright);margin-top:6px;font-weight:600}
+    .my-order-date{font-size:11px;color:var(--txt-4);margin-top:4px}
 </style>
 </head>
 
@@ -597,6 +607,15 @@ body{
   <div id="reviews-list" style="padding:20px 18px 30px"></div>
 </div>
 
+<!-- MY ORDERS PAGE -->
+<div class="page" id="page-my-orders">
+  <div class="pg-header">
+    <button class="pg-back" onclick="goPage('profile')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div class="pg-title">Мои заказы</div>
+  </div>
+  <div id="my-orders-list" style="padding:16px 18px 30px"></div>
+</div>
+
 <!-- PROFILE -->
 <div class="page" id="page-profile">
   <div class="pg-title">Профиль</div>
@@ -605,6 +624,7 @@ body{
     <div class="prof-name" id="prof-name">Гость</div>
     <div class="prof-sub">Добро пожаловать в MARATTI</div>
   </div>
+  <div class="prof-row" onclick="goPage('my-orders')"><span class="prof-row-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span><span class="prof-row-t">Мои заказы</span><span id="prof-orders-count" class="prof-row-arr">›</span></div>
   <div class="prof-row" onclick="goPage('favorites')"><span class="prof-row-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span><span class="prof-row-t">Избранное</span><span class="prof-row-arr" id="prof-fav">0</span></div>
   <div class="prof-row" onclick="goPage('cart')"><span class="prof-row-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span><span class="prof-row-t">Корзина</span><span class="prof-row-arr" id="prof-cart">0</span></div>
   <div class="prof-row" onclick="goPage('about')"><span class="prof-row-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span><span class="prof-row-t">О бренде</span><span class="prof-row-arr">›</span></div>
@@ -1096,6 +1116,7 @@ function goPage(page){
   if(page==='reviews') loadReviewsPage();
   if(page==='favorites') renderFavorites();
   if(page==='cart') renderCart();
+  if(page==='my-orders') loadMyOrders();
   if(page==='profile'){
     const pf=document.getElementById('prof-fav'); if(pf) pf.textContent=favorites.length;
     const pc=document.getElementById('prof-cart'); if(pc) pc.textContent=cart.length;
@@ -1515,6 +1536,60 @@ function initLiquidGlass(){
       setTimeout(()=>card.classList.remove('lg-touch'), 300);
     }, {passive:true});
   });
+}
+
+// ── MY ORDERS ──
+const STATUS_MAP = {
+  new:       {e:'🆕', n:'Новый',        c:'rgba(201,167,106,.15)', tc:'var(--gold)'},
+  confirmed: {e:'✅', n:'Подтверждён',  c:'rgba(42,150,112,.15)',  tc:'var(--emerald-bright)'},
+  packing:   {e:'📦', n:'Собирается',   c:'rgba(106,138,201,.15)', tc:'#6a8ac9'},
+  shipped:   {e:'🚚', n:'Отправлен',    c:'rgba(168,106,201,.15)', tc:'#a86ac9'},
+  delivered: {e:'🎉', n:'Доставлен',    c:'rgba(42,150,112,.15)',  tc:'var(--emerald-bright)'},
+  cancelled: {e:'❌', n:'Отменён',      c:'rgba(194,85,67,.15)',   tc:'var(--red)'},
+};
+
+async function loadMyOrders(){
+  const el = document.getElementById('my-orders-list');
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--txt-3)">Загрузка...</div>';
+  const u = tg.initDataUnsafe?.user;
+  const myId = u ? String(u.id) : null;
+  if(!myId){
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--txt-3)">Откройте магазин через Telegram</div>';
+    return;
+  }
+  try {
+    const r = await fetch(GITHUB_RAW+'orders.json?t='+Date.now());
+    if(!r.ok) throw new Error('no data');
+    const all = await r.json();
+    const mine = (Array.isArray(all)?all:[]).filter(o=>String(o.tgId)===myId).reverse();
+    if(!mine.length){
+      el.innerHTML = '<div style="text-align:center;padding:60px 20px"><div style="font-family:Marcellus,serif;font-size:18px;color:var(--txt-2);margin-bottom:8px">Заказов пока нет</div><div style="font-size:13px;color:var(--txt-3)">Самое время выбрать обувь!</div></div>';
+      // Обновляем счётчик в профиле
+      const pc = document.getElementById('prof-orders-count');
+      if(pc) pc.textContent = '›';
+      return;
+    }
+    // Обновляем счётчик
+    const pc = document.getElementById('prof-orders-count');
+    if(pc) pc.textContent = mine.length;
+    el.innerHTML = mine.map(o=>{
+      const num = String(o.num||o.id||'').replace('#','');
+      const st = STATUS_MAP[o.status||'new'] || STATUS_MAP.new;
+      const items = (o.items||[]).map(i=>`${i.name||''} р.${i.size||''}${i.color?' ('+i.color+')':''}`).join(', ');
+      const track = o.track ? `<div class="my-order-track">🚚 Трек: ${o.track}</div>` : '';
+      return `<div class="my-order-card">
+        <div class="my-order-num">#${num}</div>
+        <div class="my-order-status" style="background:${st.c};color:${st.tc}">${st.e} ${st.n}</div>
+        <div class="my-order-items">${items}</div>
+        <div class="my-order-total">${fmt(o.total||0)} ₽</div>
+        ${track}
+        <div class="my-order-date">${o.date||''}</div>
+      </div>`;
+    }).join('');
+  } catch(e){
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--txt-3)">Не удалось загрузить заказы</div>';
+  }
 }
 
 // ── INIT ──

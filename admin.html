@@ -168,7 +168,23 @@
     /* NOTIF */
     .notif{position:fixed;bottom:24px;right:24px;background:var(--card);color:var(--gold-l);border:1px solid var(--gold-d);padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:999;display:none;animation:fadeIn .2s;box-shadow:0 12px 40px rgba(0,0,0,.5)}
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-  </style>
+  
+    .order-card{background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:18px;margin-bottom:14px}
+    .order-card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+    .order-num{font-family:Georgia,serif;font-size:16px;font-weight:700;color:var(--gold)}
+    .order-date{font-size:12px;color:var(--text-m);font-family:inherit;font-weight:400}
+    .order-client{font-size:13px;color:var(--text-s);margin-top:2px}
+    .order-status-badge{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap;margin-bottom:4px;display:inline-block}
+    .order-total{font-size:18px;font-weight:700;color:var(--text)}
+    .order-items{font-size:13px;color:var(--text-m);margin:8px 0;border-top:1px solid var(--border);padding-top:8px}
+    .order-item-row{padding:2px 0}
+    .order-delivery{font-size:12px;color:var(--text-m);margin-top:6px}
+    .order-track{font-size:13px;color:var(--gold);margin-top:6px}
+    .order-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center;padding-top:10px;border-top:1px solid var(--border)}
+    .order-search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+    .fsel-sm{padding:7px 10px;font-size:12px}
+    .fi-sm{padding:8px 12px;font-size:12px;max-width:160px}
+</style>
 </head>
 <body>
 
@@ -200,7 +216,9 @@
         <div class="ni" onclick="goPage('orders')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>Заказы<span class="badge-new" id="nb">0</span></div>
         <div class="ni" onclick="goPage('reviews')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>Отзывы<span class="badge-new" id="rb" style="display:none">0</span></div>
         <div class="ni" onclick="goPage('promos')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>Промокоды</div>
+        <div class="ni" onclick="goPage('broadcast')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg></span>Рассылки</div>
         <div class="ni" onclick="goPage('cats')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>Категории</div>
+        <div class="ni" onclick="goPage('analytics')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>Аналитика</div>
         <div class="ni" onclick="goPage('settings')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Настройки</div>
       </div>
       <div class="sb-bottom"><div class="logout" onclick="logout()">🚪 Выйти</div></div>
@@ -286,6 +304,68 @@
         </div>
       </div>
 
+      <!-- BROADCAST -->
+      <div class="page" id="page-broadcast">
+        <div class="mhdr">
+          <div><div class="mhdr-t">Рассылки</div><div class="mhdr-s">Отправка сообщений подписчикам</div></div>
+        </div>
+        <div class="mbody">
+
+          <!-- Статистика бота -->
+          <div class="tw" style="padding:20px;margin-bottom:20px" id="bot-stats-block">
+            <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+              <span>Статистика бота</span>
+              <button class="btn btn-g btn-sm" onclick="loadBotStats()">Обновить</button>
+            </div>
+            <div id="bot-stats-content" style="color:var(--text-m);font-size:13px">
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px" id="bs-grid">
+                <div class="stat"><div class="stat-n" id="bs-users">—</div><div class="stat-l">Подписчиков</div></div>
+                <div class="stat"><div class="stat-n" id="bs-new">—</div><div class="stat-l">Новых сегодня</div></div>
+                <div class="stat"><div class="stat-n" id="bs-starts">—</div><div class="stat-l">Стартов всего</div></div>
+              </div>
+              <div id="bs-hint" style="margin-top:12px;font-size:12px;color:var(--text-m)">Введи Bot Token в Настройках чтобы видеть статистику</div>
+            </div>
+          </div>
+
+          <!-- Текстовая рассылка -->
+          <div class="tw" style="padding:20px;margin-bottom:20px">
+            <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:16px">Текстовая рассылка</div>
+            <div class="fg">
+              <label class="fl">Текст сообщения</label>
+              <textarea class="fta" id="bc-text" placeholder="Новая коллекция уже в каталоге! Успей выбрать свою пару 👞" style="min-height:100px"></textarea>
+              <div class="fhint">Поддерживается *жирный*, _курсив_. Отправится всем подписчикам.</div>
+            </div>
+            <div class="fg" style="display:flex;align-items:center;gap:12px">
+              <label class="toggle"><input type="checkbox" id="bc-add-btn" checked><span class="tsl"></span></label>
+              <span style="font-size:14px;color:var(--text-s)">Добавить кнопку "Открыть магазин"</span>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+              <button class="btn btn-p" onclick="sendBroadcast('text')" id="bc-btn-text">📢 Отправить рассылку</button>
+              <button class="btn btn-g" onclick="previewBroadcast()">👁 Предпросмотр</button>
+            </div>
+            <div id="bc-progress" style="display:none;margin-top:14px;padding:12px;background:var(--card2);border-radius:10px;font-size:13px;color:var(--text-s)"></div>
+          </div>
+
+          <!-- Рассылка с фото -->
+          <div class="tw" style="padding:20px;margin-bottom:20px">
+            <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:16px">Рассылка с фото</div>
+            <div class="fg"><label class="fl">Ссылка на фото</label><input class="fi" id="bc-photo" placeholder="https://...jpg"></div>
+            <div class="fg">
+              <label class="fl">Подпись к фото</label>
+              <textarea class="fta" id="bc-caption" placeholder="Новая коллекция MARATTI 2026 🔥"></textarea>
+            </div>
+            <button class="btn btn-p" onclick="sendBroadcast('photo')" id="bc-btn-photo">📸 Отправить с фото</button>
+          </div>
+
+          <!-- История рассылок -->
+          <div class="tw" style="padding:20px">
+            <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:16px">История рассылок</div>
+            <div id="bc-history" style="color:var(--text-m);font-size:13px">Загрузка...</div>
+          </div>
+
+        </div>
+      </div>
+
       <!-- CATEGORIES -->
       <div class="page" id="page-cats">
         <div class="mhdr">
@@ -299,6 +379,56 @@
         <div class="mbody">
           <div style="font-size:13px;color:var(--text-m);margin-bottom:16px;line-height:1.5">Категории отображаются в боте в виде фильтров и баннеров. ID — латиницей без пробелов (например: loafers). Используйте этот же ID в поле «Категория» при добавлении товара.</div>
           <div id="ct-table"></div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="page" id="page-analytics">
+        <div class="mhdr">
+          <div><div class="mhdr-t">Аналитика</div><div class="mhdr-s">Статистика и когорты</div></div>
+          <button class="btn btn-g" onclick="loadAnalytics()">Обновить</button>
+        </div>
+        <div class="mbody">
+
+          <!-- Основные метрики -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px" id="analytics-stats">
+            <div class="stat"><div class="stat-n" id="an-users">—</div><div class="stat-l">Подписчиков</div></div>
+            <div class="stat"><div class="stat-n" id="an-orders">—</div><div class="stat-l">Заказов</div></div>
+            <div class="stat"><div class="stat-n" id="an-revenue">—</div><div class="stat-l">Выручка ₽</div></div>
+            <div class="stat"><div class="stat-n" id="an-avg">—</div><div class="stat-l">Средний чек</div></div>
+            <div class="stat"><div class="stat-n" id="an-conv">—</div><div class="stat-l">Конверсия %</div></div>
+            <div class="stat"><div class="stat-n" id="an-refs">—</div><div class="stat-l">Рефералов</div></div>
+          </div>
+
+          <!-- Когортный анализ -->
+          <div class="tw" style="padding:20px;margin-bottom:20px">
+            <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:16px">Когортный анализ по месяцам</div>
+            <div id="cohort-table">Загрузка...</div>
+          </div>
+
+          <!-- Сегменты -->
+          <div class="tw" style="padding:20px;margin-bottom:20px">
+            <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:16px">Сегменты пользователей</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px" id="segments-grid">
+              <div class="stat" style="cursor:pointer" onclick="selectSegment('bought')"><div class="stat-n" id="seg-bought">—</div><div class="stat-l">Купили хоть раз</div></div>
+              <div class="stat" style="cursor:pointer" onclick="selectSegment('notbought')"><div class="stat-n" id="seg-notbought">—</div><div class="stat-l">Ещё не купили</div></div>
+              <div class="stat" style="cursor:pointer" onclick="selectSegment('inactive')"><div class="stat-n" id="seg-inactive">—</div><div class="stat-l">Неактивны 30+ дней</div></div>
+              <div class="stat" style="cursor:pointer" onclick="selectSegment('referral')"><div class="stat-n" id="seg-referral">—</div><div class="stat-l">Пришли по реф. ссылке</div></div>
+            </div>
+            <div id="segment-result" style="display:none;margin-top:16px;padding:16px;background:var(--card2);border-radius:10px">
+              <div id="segment-info" style="font-size:14px;margin-bottom:12px"></div>
+              <div class="fg"><textarea class="fta" id="seg-bc-text" placeholder="Текст рассылки для этого сегмента..."></textarea></div>
+              <button class="btn btn-p" onclick="sendSegmentBroadcast()" id="seg-bc-btn">📢 Отправить сегменту</button>
+              <div id="seg-bc-progress" style="display:none;margin-top:10px;font-size:13px;color:var(--text-m)"></div>
+            </div>
+          </div>
+
+          <!-- Источники трафика -->
+          <div class="tw" style="padding:20px">
+            <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:16px">Источники трафика</div>
+            <div id="sources-chart"></div>
+          </div>
+
         </div>
       </div>
 
@@ -323,6 +453,11 @@
               <label class="fl">GitHub Token (для синхронизации)</label>
               <input class="fi" type="password" id="s-token" placeholder="ghp_...">
               <div class="fhint">🔒 Хранится только в твоём браузере — никто другой не видит</div>
+            </div>
+            <div class="fg">
+              <label class="fl">Bot Token (для рассылок из админки)</label>
+              <input class="fi" type="password" id="s-bot-token" placeholder="8737124576:AAF...">
+              <div class="fhint">🔒 Хранится только в браузере. Нужен для раздела "Рассылки"</div>
             </div>
             <button class="btn btn-p" onclick="saveSettings()">Сохранить</button>
           </div>
@@ -515,6 +650,8 @@ function goPage(page){
   if(page==='reviews') renderReviews();
   if(page==='promos') renderPromos();
   if(page==='cats') renderCatsAdmin();
+  if(page==='broadcast'){ loadBotStats(); loadBroadcastHistory(); }
+  if(page==='analytics') loadAnalytics();
   if(page==='dashboard') renderDashboard();
   if(page==='settings'){ const t=getToken(); if(t) document.getElementById('s-token').value=t; loadHeroSettings(); }
 }
@@ -709,29 +846,93 @@ function closeMoProduct(){ document.getElementById('mo-product').classList.remov
 
 // ── ORDERS ──
 function renderOrders(){
-  document.getElementById('o-count').textContent = orders.length?orders.length+' заказов':'Нет заказов';
-  const el=document.getElementById('o-table');
-  if(!orders.length){ el.innerHTML='<div class="empty"><div class="empty-ic">📦</div><div class="empty-t">Заказов пока нет</div><div style="font-size:13px">Они появятся когда клиенты оформят покупку</div></div>'; return; }
-  el.innerHTML='<div class="tw"><table><thead><tr><th>№</th><th>Покупатель</th><th>Товары</th><th>Доставка</th><th>Сумма</th><th>Статус</th><th>Действия</th></tr></thead><tbody>'+
-    [...orders].reverse().map(o=>{
-      const confirmBtn = o.status==='new' ? '<button class="btn btn-p btn-sm" onclick="confirmOrder('+o.id+')">✅</button>' : '';
-      const cancelBtn  = o.status==='new' ? '<button class="btn btn-d btn-sm" onclick="cancelOrder('+o.id+')">❌</button>' : '';
-      return `<tr>
-      <td style="color:var(--text-m)">#${String(o.id).slice(-6)}</td>
-      <td><div style="font-weight:500">${o.name||''} ${o.lastname||''}</div><div style="font-size:11px;color:var(--text-m)">${o.phone||''}</div></td>
-      <td style="font-size:12px;color:var(--text-s);max-width:180px">${(o.items||[]).map(i=>i.name+' р.'+i.size).join(', ')}</td>
-      <td style="font-size:12px"><div>${o.deliveryType||''}</div><div style="color:var(--text-m);font-size:11px">${o.city||''}</div></td>
-      <td style="color:var(--gold);font-family:Georgia,serif;font-weight:700">${fmt(o.total||0)} ₽</td>
-      <td><span class="os os-${o.status}">${statusLabel(o.status)}</span></td>
-      <td><div class="actions">
-        <button class="btn btn-g btn-sm" onclick="openOrder(${o.id})">👁</button>
-        ${confirmBtn}
-        ${cancelBtn}
-        <button class="btn btn-g btn-sm" onclick="deleteOrder(${o.id})">🗑</button>
-      </div></td>
-    </tr>`;
-    }).join('')+'</tbody></table></div>';
+  const el=document.getElementById('orders-list');
+  if(!el) return;
+  const statusMap={
+    new:['🆕','Новый','#c9a76a'],
+    confirmed:['✅','Подтверждён','#4a8a64'],
+    packing:['📦','Собирается','#6a8ac9'],
+    shipped:['🚚','Отправлен','#a86ac9'],
+    delivered:['🎉','Доставлен','#4a8a64'],
+    cancelled:['❌','Отменён','#c25543']
+  };
+  const q=(document.getElementById('order-search')?.value||'').toLowerCase();
+  const sf=document.getElementById('order-status-filter')?.value||'all';
+  let list=[...orders].reverse();
+  if(q) list=list.filter(o=>
+    JSON.stringify(o).toLowerCase().includes(q)
+  );
+  if(sf!=='all') list=list.filter(o=>(o.status||'new')===sf);
+  const nb=document.getElementById('nb');
+  const newCount=orders.filter(o=>(o.status||'new')==='new').length;
+  if(nb){nb.textContent=newCount;nb.style.display=newCount?'flex':'none';}
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-t">Заказов нет</div></div>';return;}
+  el.innerHTML=list.map(o=>{
+    const num=String(o.num||o.id||'').replace('#','');
+    const [se,sn,sc]=statusMap[o.status||'new']||['❓','Неизвестен','#999'];
+    const items=(o.items||[]).map(i=>`<div class="order-item-row">${i.name||''} р.${i.size||''} — ${i.price||0} ₽</div>`).join('');
+    const track=o.track?`<div class="order-track">🚚 Трек: <b>${o.track}</b></div>`:'';
+    return `<div class="order-card">
+      <div class="order-card-head">
+        <div>
+          <div class="order-num">#${num} <span class="order-date">${o.date||''}</span></div>
+          <div class="order-client">${o.name||''} ${o.lastname||''} · ${o.phone||''}</div>
+          <div class="order-client" style="font-size:11px;opacity:.7">${o.tgUsername||''} (ID: ${o.tgId||''})</div>
+        </div>
+        <div style="text-align:right">
+          <div class="order-status-badge" style="background:${sc}20;color:${sc};border:1px solid ${sc}40">${se} ${sn}</div>
+          <div class="order-total">${(o.total||0).toLocaleString('ru-RU')} ₽</div>
+        </div>
+      </div>
+      <div class="order-items">${items}</div>
+      <div class="order-delivery">🏙 ${o.city||''} · ${o.address||''} · ${o.deliveryType||''}</div>
+      ${track}
+      <div class="order-actions">
+        <select class="fsel fsel-sm" id="st-${num}" onchange="">
+          ${Object.entries(statusMap).map(([k,[e,n]])=>`<option value="${k}"${(o.status||'new')===k?' selected':''}>${e} ${n}</option>`).join('')}
+        </select>
+        <input class="fi fi-sm" id="tr-${num}" placeholder="Трек-номер" value="${o.track||''}">
+        <button class="btn btn-p btn-sm" onclick="saveOrderStatus('${num}')">Сохранить</button>
+        <button class="btn btn-g btn-sm" onclick="notifyBuyer('${num}')">📨 Уведомить</button>
+      </div>
+    </div>`;
+  }).join('');
 }
+
+function saveOrderStatus(num){
+  const newStatus=document.getElementById('st-'+num)?.value;
+  const track=document.getElementById('tr-'+num)?.value||'';
+  if(!newStatus) return;
+  const idx=orders.findIndex(o=>String(o.num||o.id||'').replace('#','')=== num);
+  if(idx<0){ showNotif('Заказ не найден'); return; }
+  orders[idx].status=newStatus;
+  orders[idx].track=track;
+  orders[idx].status_updated=new Date().toLocaleString('ru-RU');
+  saveOrdersToGitHub();
+  renderOrders();
+  showNotif('Статус обновлён!');
+}
+
+async function notifyBuyer(num){
+  const token=getBotToken();
+  if(!token){ showNotif('Введи Bot Token в Настройках!'); return; }
+  const order=orders.find(o=>String(o.num||o.id||'').replace('#','')=== num);
+  if(!order||!order.tgId){ showNotif('Нет Telegram ID покупателя'); return; }
+  const statusMap={new:'🆕 Новый',confirmed:'✅ Подтверждён',packing:'📦 Собирается',shipped:'🚚 Отправлен',delivered:'🎉 Доставлен',cancelled:'❌ Отменён'};
+  const sn=statusMap[order.status||'new']||order.status;
+  let text=`📦 *MARATTI* — заказ #${num}\n\n${sn}`;
+  if(order.track) text+=`\n\n🚚 Трек: \`${order.track}\``;
+  try {
+    const r=await fetch('https://api.telegram.org/bot'+token+'/sendMessage',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:order.tgId,text,parse_mode:'Markdown'})
+    });
+    const d=await r.json();
+    if(d.ok) showNotif('✅ Покупатель уведомлён!');
+    else showNotif('Ошибка: '+d.description);
+  } catch(e){ showNotif('Ошибка: '+e.message); }
+}
+
 
 function openOrder(id){
   const o=orders.find(x=>x.id===id); if(!o) return;
@@ -769,7 +970,14 @@ function cancelOrder(id){ if(!confirm('Отменить заказ?')) return; c
 function deleteOrder(id){ if(!confirm('Удалить заказ?')) return; orders=orders.filter(x=>x.id!==id); saveOrders(); saveOrdersToGitHub(); renderOrders(); renderDashboard(); showNotif('🗑 Заказ удалён'); }
 
 // ── SETTINGS ──
-function saveSettings(){ const t=document.getElementById('s-token').value.trim(); if(t) localStorage.setItem('gh_token',t); showNotif('✅ Настройки сохранены!'); }
+function saveSettings(){
+  const t=document.getElementById('s-token').value.trim();
+  if(t) localStorage.setItem('gh_token',t);
+  const bt=document.getElementById('s-bot-token').value.trim();
+  if(bt) localStorage.setItem('bot_token',bt);
+  showNotif('✅ Настройки сохранены!');
+}
+function getBotToken(){ return localStorage.getItem('bot_token')||''; }
 function changePwd(){ const p=document.getElementById('s-pwd').value; if(p.length<4){ alert('Минимум 4 символа'); return; } localStorage.setItem('admin_pwd',p); document.getElementById('s-pwd').value=''; showNotif('✅ Пароль изменён!'); }
 
 // ── INIT ──
@@ -1057,6 +1265,315 @@ async function saveHeroSettings(){
   } catch(e){ showNotif('Ошибка: '+e.message); }
 }
 
+// ── BROADCAST & BOT STATS ──
+const TG_API = 'https://api.telegram.org/bot';
+const WEBAPP_URL_CONST = 'https://maratti-shop.github.io/maratti';
+
+async function tgRequest(method, params={}){
+  const token = getBotToken();
+  if(!token){ showNotif('Введи Bot Token в Настройках!'); return null; }
+  try {
+    const r = await fetch(TG_API+token+'/'+method, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(params)
+    });
+    return await r.json();
+  } catch(e){ showNotif('Ошибка: '+e.message); return null; }
+}
+
+async function getBotInfo(){
+  const res = await tgRequest('getMe');
+  return res && res.ok ? res.result : null;
+}
+
+async function loadBotStats(){
+  const hint = document.getElementById('bs-hint');
+  const token = getBotToken();
+  if(!token){
+    if(hint) hint.style.display='block';
+    return;
+  }
+  if(hint) hint.style.display='none';
+
+  // Получаем инфо о боте
+  const info = await getBotInfo();
+  if(info){
+    document.getElementById('bs-users').textContent = '—';
+    document.getElementById('bs-new').textContent = '—';
+    document.getElementById('bs-starts').textContent = '—';
+  }
+
+  // Загружаем статистику из bot_stats.json на GitHub
+  try {
+    const r = await fetch('https://raw.githubusercontent.com/maratti-shop/maratti/main/bot_stats.json?t='+Date.now());
+    if(r.ok){
+      const stats = await r.json();
+      const today = new Date().toISOString().split('T')[0];
+      const d = stats.daily&&stats.daily[today] ? stats.daily[today] : {};
+      document.getElementById('bs-users').textContent = stats.total_users||'—';
+      document.getElementById('bs-new').textContent = d.new_users||0;
+      document.getElementById('bs-starts').textContent = stats.starts||'—';
+    }
+  } catch(e){}
+
+  // Загружаем users.json для подсчёта
+  try {
+    const r = await fetch('https://raw.githubusercontent.com/maratti-shop/maratti/main/users.json?t='+Date.now());
+    if(r.ok){
+      const users = await r.json();
+      const count = Object.keys(users).length;
+      document.getElementById('bs-users').textContent = count;
+      const active = Object.values(users).filter(u=>!u.blocked).length;
+      document.getElementById('bs-new').textContent = Object.values(users)
+        .filter(u=>u.joined && u.joined.includes(new Date().toLocaleDateString('ru-RU').split('.').reverse().join('.'))).length;
+    }
+  } catch(e){}
+}
+
+async function loadBroadcastHistory(){
+  const el = document.getElementById('bc-history');
+  if(!el) return;
+  try {
+    const r = await fetch('https://raw.githubusercontent.com/maratti-shop/maratti/main/broadcasts.json?t='+Date.now());
+    if(r.ok){
+      const list = await r.json();
+      if(!list.length){ el.innerHTML='Рассылок ещё не было'; return; }
+      el.innerHTML = list.slice(0,8).map(b=>
+        '<div style="padding:12px;background:var(--card2);border-radius:10px;margin-bottom:8px">'+
+        '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-m);margin-bottom:6px">'+
+        '<span>'+b.date+' · '+b.type+'</span>'+
+        '<span style="color:var(--gold)">✅ '+b.ok+'/'+b.total+'</span></div>'+
+        '<div style="font-size:13px;color:var(--text-s)">'+b.text.substring(0,80)+(b.text.length>80?'...':'')+'</div>'+
+        '</div>'
+      ).join('');
+    } else { el.innerHTML='Нет данных (загрузи broadcasts.json на GitHub)'; }
+  } catch(e){ el.innerHTML='Рассылок пока нет'; }
+}
+
+function previewBroadcast(){
+  const text = document.getElementById('bc-text').value.trim();
+  if(!text){ showNotif('Введи текст!'); return; }
+  alert('Предпросмотр: ' + text);
+}
+
+async function sendBroadcast(type){
+  const token = getBotToken();
+  if(!token){ showNotif('Введи Bot Token в Настройках!'); return; }
+
+  let text='', photo='', caption='';
+  if(type==='text'){
+    text = document.getElementById('bc-text').value.trim();
+    if(!text){ showNotif('Введи текст сообщения!'); return; }
+  } else {
+    photo = document.getElementById('bc-photo').value.trim();
+    caption = document.getElementById('bc-caption').value.trim();
+    if(!photo){ showNotif('Введи ссылку на фото!'); return; }
+  }
+
+  const addBtn = document.getElementById('bc-add-btn')&&document.getElementById('bc-add-btn').checked;
+  const keyboard = addBtn ? {inline_keyboard:[[{text:'🛍 Открыть магазин MARATTI',web_app:{url:WEBAPP_URL_CONST}}]]} : null;
+
+  // Загружаем список пользователей
+  const progress = document.getElementById('bc-progress');
+  progress.style.display='block';
+  progress.innerHTML='⏳ Загружаю список подписчиков...';
+
+  let users = {};
+  try {
+    const r = await fetch('https://raw.githubusercontent.com/maratti-shop/maratti/main/users.json?t='+Date.now());
+    if(r.ok) users = await r.json();
+  } catch(e){ progress.innerHTML='❌ Не удалось загрузить users.json. Убедись что файл есть на GitHub.'; return; }
+
+  const uids = Object.keys(users).filter(uid=>!users[uid].blocked);
+  if(!uids.length){ progress.innerHTML='❌ Нет подписчиков в базе'; return; }
+
+  const btnId = type==='text' ? 'bc-btn-text' : 'bc-btn-photo';
+  document.getElementById(btnId).disabled=true;
+
+  let ok=0, fail=0, total=uids.length;
+  progress.innerHTML='⏳ Отправляю 0/'+total+'...';
+
+  for(let i=0; i<uids.length; i++){
+    const uid = uids[i];
+    try {
+      const params = {chat_id:parseInt(uid)};
+      if(keyboard) params.reply_markup = keyboard;
+      let method;
+      if(type==='text'){
+        method='sendMessage';
+        params.text=text;
+        params.parse_mode='Markdown';
+      } else {
+        method='sendPhoto';
+        params.photo=photo;
+        if(caption){ params.caption=caption; params.parse_mode='Markdown'; }
+      }
+      const res = await tgRequest(method, params);
+      if(res&&res.ok) ok++; else fail++;
+    } catch(e){ fail++; }
+    if((i+1)%10===0 || i===uids.length-1){
+      progress.innerHTML='⏳ Отправляю '+(i+1)+'/'+total+'... ✅'+ok+' ❌'+fail;
+    }
+    await new Promise(r=>setTimeout(r,50));
+  }
+
+  document.getElementById(btnId).disabled=false;
+  progress.innerHTML='✅ <b>Рассылка завершена!</b><br>Отправлено: '+ok+' | Не доставлено: '+fail+' | Всего: '+total;
+  showNotif('Рассылка завершена: '+ok+'/'+total);
+  loadBroadcastHistory();
+}
+
+// ── ANALYTICS ──
+let currentSegmentIds = [];
+let currentSegmentLabel = '';
+
+async function loadAnalytics(){
+  // Основные метрики из локальных данных
+  const totalUsers = products.length; // будет заменено
+  const doneOrders = orders.filter(o=>o.status&&o.status!=='cancelled'&&o.status!=='new');
+  const revenue = orders.filter(o=>o.status&&o.status!=='cancelled').reduce((s,o)=>s+(o.total||0),0);
+  const avgCheck = doneOrders.length ? Math.round(revenue/doneOrders.length) : 0;
+
+  // Загружаем пользователей с GitHub для аналитики
+  try {
+    const r = await fetch('https://raw.githubusercontent.com/maratti-shop/maratti/main/users.json?t='+Date.now());
+    if(r.ok){
+      const users = await r.json();
+      const ulist = Object.values(users);
+      const total = ulist.length;
+      const bought = ulist.filter(u=>u.orders>0).length;
+      const notBought = total - bought;
+      const conv = total ? Math.round(bought/total*100) : 0;
+      const refs = ulist.filter(u=>u.source==='referral').length;
+      const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-30);
+      const inactive = ulist.filter(u=>{
+        if(!u.last_seen) return false;
+        const parts = u.last_seen.split(' ')[0].split('.');
+        const d = new Date(parts[2],parts[1]-1,parts[0]);
+        return d < cutoff;
+      }).length;
+
+      document.getElementById('an-users').textContent = total;
+      document.getElementById('an-orders').textContent = doneOrders.length;
+      document.getElementById('an-revenue').textContent = revenue.toLocaleString('ru-RU');
+      document.getElementById('an-avg').textContent = avgCheck.toLocaleString('ru-RU');
+      document.getElementById('an-conv').textContent = conv+'%';
+      document.getElementById('an-refs').textContent = refs;
+      document.getElementById('seg-bought').textContent = bought;
+      document.getElementById('seg-notbought').textContent = notBought;
+      document.getElementById('seg-inactive').textContent = inactive;
+      document.getElementById('seg-referral').textContent = refs;
+
+      // Когорты
+      const cohorts = {};
+      ulist.forEach(u=>{
+        if(!u.joined_iso) return;
+        const month = u.joined_iso.substring(0,7);
+        cohorts[month] = cohorts[month]||{users:0,orders:0,spent:0};
+        cohorts[month].users++;
+        cohorts[month].orders += u.orders||0;
+        cohorts[month].spent += u.total_spent||0;
+      });
+      const rows = Object.entries(cohorts).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,6);
+      const cohortHtml = rows.length ? '<div class="tw"><table><thead><tr><th>Месяц</th><th>Подписчиков</th><th>Заказов</th><th>Конверсия</th><th>Ср. чек ₽</th></tr></thead><tbody>'+
+        rows.map(([m,c])=>{
+          const conv2 = c.users ? Math.round(c.orders/c.users*100) : 0;
+          const avg2 = c.orders ? Math.round(c.spent/c.orders) : 0;
+          return `<tr><td>${m}</td><td>${c.users}</td><td>${c.orders}</td><td>${conv2}%</td><td>${avg2.toLocaleString('ru-RU')}</td></tr>`;
+        }).join('')+'</tbody></table></div>'
+      : '<div style="color:var(--text-m)">Недостаточно данных</div>';
+      document.getElementById('cohort-table').innerHTML = cohortHtml;
+
+      // Источники
+      const src = {};
+      ulist.forEach(u=>{ const s=u.source||'organic'; src[s]=(src[s]||0)+1; });
+      const srcHtml = Object.entries(src).map(([s,c])=>{
+        const pct = total ? Math.round(c/total*100) : 0;
+        const labels = {organic:'🔍 Органика',referral:'👥 Рефералы',instagram:'📸 Instagram'};
+        return `<div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+            <span>${labels[s]||s}</span><span style="color:var(--gold)">${c} (${pct}%)</span>
+          </div>
+          <div style="height:6px;background:var(--border);border-radius:3px">
+            <div style="height:6px;background:var(--gold);border-radius:3px;width:${pct}%"></div>
+          </div></div>`;
+      }).join('');
+      document.getElementById('sources-chart').innerHTML = srcHtml;
+
+      // Сохраняем users для сегментов
+      window._analyticsUsers = users;
+    }
+  } catch(e){ console.error('analytics load:', e); }
+}
+
+function selectSegment(type){
+  const users = window._analyticsUsers;
+  if(!users){ showNotif('Сначала загрузи аналитику'); return; }
+  const ulist = Object.values(users);
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-30);
+  let filtered = [];
+  let label = '';
+  if(type==='bought'){
+    filtered = ulist.filter(u=>u.orders>0&&!u.blocked);
+    label = 'Купили хоть раз';
+  } else if(type==='notbought'){
+    filtered = ulist.filter(u=>!u.orders&&!u.blocked);
+    label = 'Ещё не купили';
+  } else if(type==='inactive'){
+    filtered = ulist.filter(u=>{
+      if(u.blocked) return false;
+      if(!u.last_seen) return true;
+      const parts = u.last_seen.split(' ')[0].split('.');
+      const d = new Date(parts[2],parts[1]-1,parts[0]);
+      return d < cutoff;
+    });
+    label = 'Неактивны 30+ дней';
+  } else if(type==='referral'){
+    filtered = ulist.filter(u=>u.source==='referral'&&!u.blocked);
+    label = 'Пришли по рефералу';
+  }
+  currentSegmentIds = filtered.map(u=>String(u.id));
+  currentSegmentLabel = label;
+  const segResult = document.getElementById('segment-result');
+  const segInfo = document.getElementById('segment-info');
+  segResult.style.display = 'block';
+  segInfo.innerHTML = `<b>${label}</b>: ${filtered.length} пользователей`;
+  segResult.scrollIntoView({behavior:'smooth'});
+}
+
+async function sendSegmentBroadcast(){
+  const token = getBotToken();
+  if(!token){ showNotif('Введи Bot Token в Настройках!'); return; }
+  if(!currentSegmentIds.length){ showNotif('Выбери сегмент'); return; }
+  const text = document.getElementById('seg-bc-text').value.trim();
+  if(!text){ showNotif('Введи текст!'); return; }
+  const prog = document.getElementById('seg-bc-progress');
+  prog.style.display='block';
+  const btn = document.getElementById('seg-bc-btn');
+  btn.disabled=true;
+  let ok=0,fail=0;
+  for(let i=0;i<currentSegmentIds.length;i++){
+    try {
+      const r = await fetch('https://api.telegram.org/bot'+token+'/sendMessage',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          chat_id:parseInt(currentSegmentIds[i]),
+          text,parse_mode:'Markdown',
+          reply_markup:{inline_keyboard:[[{text:'🛍 Открыть магазин',web_app:{url:'https://maratti-shop.github.io/maratti'}}]]}
+        })
+      });
+      const d=await r.json();
+      if(d.ok) ok++; else fail++;
+    } catch(e){ fail++; }
+    if((i+1)%10===0) prog.textContent='⏳ '+(i+1)+'/'+currentSegmentIds.length+'...';
+    await new Promise(r=>setTimeout(r,50));
+  }
+  btn.disabled=false;
+  prog.innerHTML='✅ <b>Готово!</b> '+ok+'/'+currentSegmentIds.length+' доставлено';
+  showNotif('Рассылка сегменту завершена!');
+}
+
 async function loadPromos(){
   if(!getToken()){
     const local = localStorage.getItem('maratti_promos');
@@ -1182,6 +1699,7 @@ function init(){
   categories=JSON.parse(localStorage.getItem('maratti_categories')||'[]');
   renderDashboard(); renderProducts();
   const t=getToken(); if(t) document.getElementById('s-token').value=t;
+  const bt=getBotToken(); if(bt && document.getElementById('s-bot-token')) document.getElementById('s-bot-token').value=bt;
   if(getToken()){ loadOrders(); loadCategories(); }
 }
 </script>
