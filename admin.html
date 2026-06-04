@@ -5,35 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MARATTI Admin</title>
   <style>
-    :root{--bg:#0a0f0a;--surface:#111811;--card:#141f14;--card2:#1a261a;--green:#1a4a1a;--green-l:#2d7a2d;--green-b:#3a9c3a;--gold:#c9a84c;--gold-d:#a08030;--text:#e8f0e8;--text-s:#8aaa8a;--text-m:#5a7a5a;--border:#1e2e1e;--border2:#243024;--red:#c0392b;--red-d:#922b21}
+    :root{--bg:#0a0e0c;--surface:#131b16;--card:#141d18;--card2:#1a2620;--green:#155741;--green-l:#1d7355;--green-b:#7d796e;--gold:#c9a76a;--gold-d:#a8884f;--gold-l:#e0c489;--text:#ece8df;--text-s:#b8b3a6;--text-m:#7d796e;--border:#22302a;--border2:#2d3d35;--red:#c25543;--red-d:#a8432e;--dark:#0a0e0c}
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(21,87,65,.18),transparent 55%)}
 
     /* LOGIN */
     .login-w{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-    .login-b{background:var(--surface);border:1px solid var(--border2);border-top:3px solid var(--gold);border-radius:16px;padding:40px 32px;width:100%;max-width:360px;text-align:center}
+    .login-b{background:var(--surface);border:1px solid var(--border2);border-top:2px solid var(--gold);border-radius:16px;padding:40px 32px;width:100%;max-width:360px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.6)}
     .login-logo{font-family:Georgia,serif;font-size:28px;font-weight:700;letter-spacing:4px;color:var(--gold);margin-bottom:6px}
     .login-sub{font-size:13px;color:var(--text-m);margin-bottom:32px}
     .login-inp{width:100%;background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:13px 16px;font-size:15px;color:var(--text);outline:none;margin-bottom:14px;font-family:inherit}
     .login-inp:focus{border-color:var(--green-l)}
-    .login-btn{width:100%;background:linear-gradient(135deg,#1a4a1a,#2d7a2d);color:var(--gold);border:1px solid var(--gold-d);padding:14px;font-family:Georgia,serif;font-size:15px;font-weight:700;cursor:pointer;border-radius:10px;letter-spacing:1px}
+    .login-btn{width:100%;background:linear-gradient(135deg,var(--gold-l),var(--gold-d));color:var(--bg);border:none;padding:14px;font-family:Georgia,serif;font-size:15px;font-weight:700;cursor:pointer;border-radius:10px;letter-spacing:1px}
     .login-err{color:var(--red);font-size:13px;margin-top:10px;display:none}
 
     /* LAYOUT */
     .layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
-    .sidebar{background:var(--surface);border-right:1px solid var(--border2);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
-    .sb-logo{padding:24px 20px 16px;border-bottom:1px solid var(--border2)}
-    .sb-logo-t{font-family:Georgia,serif;font-size:18px;font-weight:700;letter-spacing:3px;color:var(--gold)}
-    .sb-logo-s{font-size:11px;color:var(--text-m);margin-top:2px}
+    .sidebar{background:var(--dark);border-right:none;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+    .sb-logo{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+    .sb-logo-t{font-family:Georgia,serif;font-size:22px;font-weight:700;letter-spacing:3px;color:var(--gold-l)}
+    .sb-logo-s{font-size:11px;color:var(--gold);margin-top:2px}
     .sb-nav{padding:12px 0;flex:1}
-    .ni{display:flex;align-items:center;gap:10px;padding:11px 20px;font-size:14px;color:var(--text-s);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
-    .ni:hover{background:var(--card);color:var(--text)}
-    .ni.on{background:var(--card);color:var(--gold);border-left-color:var(--gold);font-weight:600}
-    .ni .ic{font-size:18px;width:22px;text-align:center}
-    .sb-bottom{padding:16px 20px;border-top:1px solid var(--border2)}
-    .logout{font-size:13px;color:var(--text-m);cursor:pointer;display:flex;align-items:center;gap:8px}
+    .ni{display:flex;align-items:center;gap:10px;padding:11px 20px;font-size:14px;color:rgba(255,255,255,.6);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+    .ni:hover{background:rgba(255,255,255,.06);color:#fff}
+    .ni.on{background:rgba(255,255,255,.08);color:var(--gold);border-left-color:var(--gold);font-weight:600}
+    .ni .ic{display:inline-flex;align-items:center;font-size:18px;width:22px;text-align:center}
+    .sb-bottom{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1)}
+    .logout{font-size:13px;color:rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;gap:8px}
     .logout:hover{color:var(--red)}
-    .badge-new{margin-left:auto;background:var(--gold);color:#0a0f0a;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;display:none}
+    .badge-new{margin-left:auto;background:#c0392b;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;display:none}
 
     /* MAIN */
     .main{overflow-y:auto} @media(max-width:768px){.main{padding-top:60px}}
@@ -77,8 +77,8 @@
     .btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:opacity .15s}
     .btn:hover{opacity:.85}
     .btn:active{opacity:.7}
-    .btn-p{background:linear-gradient(135deg,#1a4a1a,#2d7a2d);color:var(--gold);border:1px solid var(--gold-d)}
-    .btn-save{background:linear-gradient(135deg,#7a4a1a,#c9a84c);color:#0a0f0a;border:1px solid var(--gold)}
+    .btn-p{background:linear-gradient(135deg,var(--gold-l),var(--gold-d));color:var(--bg);border:none;font-weight:600}
+    .btn-save{background:linear-gradient(135deg,var(--gold-l),var(--gold-d));color:var(--bg);border:none;font-weight:700}
     .btn-d{background:var(--red-d);color:#fff}
     .btn-g{background:transparent;color:var(--text-s);border:1px solid var(--border2)}
     .btn-sm{padding:7px 14px;font-size:12px}
@@ -110,7 +110,7 @@
     .toggle input{opacity:0;width:0;height:0}
     .tsl{position:absolute;inset:0;background:var(--border2);border-radius:22px;cursor:pointer;transition:.2s}
     .tsl:before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:var(--text-m);border-radius:50%;transition:.2s}
-    input:checked+.tsl{background:var(--green)}
+    input:checked+.tsl{background:var(--gold-d)}
     input:checked+.tsl:before{transform:translateX(18px);background:var(--gold)}
 
     /* ORDER STATUS */
@@ -164,7 +164,7 @@
     @media (max-width: 768px) { .hamburger { display: flex; } }
 
     /* NOTIF */
-    .notif{position:fixed;bottom:24px;right:24px;background:var(--green);color:var(--gold);border:1px solid var(--gold-d);padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:999;display:none;animation:fadeIn .2s}
+    .notif{position:fixed;bottom:24px;right:24px;background:var(--card);color:var(--gold-l);border:1px solid var(--gold-d);padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:999;display:none;animation:fadeIn .2s;box-shadow:0 12px 40px rgba(0,0,0,.5)}
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
@@ -193,11 +193,12 @@
     <div class="sidebar">
       <div class="sb-logo"><div class="sb-logo-t">MARATTI</div><div class="sb-logo-s">Админ панель</div></div>
       <div class="sb-nav">
-        <div class="ni on" onclick="goPage('dashboard')"><span class="ic">📊</span>Дашборд</div>
-        <div class="ni" onclick="goPage('products')"><span class="ic">👞</span>Товары</div>
-        <div class="ni" onclick="goPage('orders')"><span class="ic">📦</span>Заказы<span class="badge-new" id="nb">0</span></div>
-        <div class="ni" onclick="goPage('reviews')"><span class="ic">⭐</span>Отзывы<span class="badge-new" id="rb" style="display:none">0</span></div>
-        <div class="ni" onclick="goPage('settings')"><span class="ic">⚙️</span>Настройки</div>
+        <div class="ni on" onclick="goPage('dashboard')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span>Дашборд</div>
+        <div class="ni" onclick="goPage('products')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 17h20v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2z"/><path d="M2 17l1.5-9 4 2 2-3 3 6 9 1v3"/></svg></span>Товары</div>
+        <div class="ni" onclick="goPage('orders')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>Заказы<span class="badge-new" id="nb">0</span></div>
+        <div class="ni" onclick="goPage('reviews')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>Отзывы<span class="badge-new" id="rb" style="display:none">0</span></div>
+        <div class="ni" onclick="goPage('promos')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>Промокоды</div>
+        <div class="ni" onclick="goPage('settings')"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Настройки</div>
       </div>
       <div class="sb-bottom"><div class="logout" onclick="logout()">🚪 Выйти</div></div>
     </div>
@@ -252,6 +253,34 @@
           </div>
         </div>
         <div class="mbody"><div id="rv-table"></div></div>
+      </div>
+
+      <!-- PROMOS -->
+      <div class="page" id="page-promos">
+        <div class="mhdr">
+          <div><div class="mhdr-t">Промокоды</div><div class="mhdr-s" id="pr-count">Управление скидками</div></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-g" onclick="loadPromos()">Обновить</button>
+            <button class="btn btn-p" onclick="openAddPromo()">+ Промокод</button>
+            <button class="btn btn-save" onclick="savePromosToGitHub()">Сохранить</button>
+          </div>
+        </div>
+        <div class="mbody">
+          <!-- Блок акции -->
+          <div style="background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:20px;margin-bottom:20px">
+            <div style="font-family:Georgia,serif;font-size:16px;font-weight:700;color:var(--gold);margin-bottom:6px">Акция в сторис «Акции»</div>
+            <div style="font-size:12px;color:var(--text-m);margin-bottom:16px">Этот текст увидят покупатели при нажатии на сторис «Акции» в боте</div>
+            <div class="fg"><label class="fl">Заголовок акции</label><input class="fi" id="promo-title" placeholder="Промокод ИНСТА"></div>
+            <div class="fg"><label class="fl">Текст акции</label><textarea class="fta" id="promo-text" placeholder="Скидка 500₽ на первый заказ по промокоду ИНСТА"></textarea></div>
+            <div class="fg" style="display:flex;align-items:center;gap:12px">
+              <label class="toggle"><input type="checkbox" id="promo-active" checked><span class="tsl"></span></label>
+              <span style="font-size:14px;color:var(--text-s)">Акция активна</span>
+            </div>
+            <button class="btn btn-save" onclick="savePromotion()" style="width:100%;margin-top:8px">Сохранить акцию</button>
+          </div>
+          <!-- Список промокодов -->
+          <div id="pr-table"></div>
+        </div>
       </div>
 
       <!-- SETTINGS -->
@@ -365,6 +394,36 @@
   </div>
 </div>
 
+<!-- PROMO MODAL -->
+<div class="mo" id="mo-promo" onclick="if(event.target===this)closeMoPromo()">
+  <div class="mo-box" style="max-width:440px">
+    <div class="mo-hdr">
+      <div class="mo-t">Новый промокод</div>
+      <div class="mo-close" onclick="closeMoPromo()">×</div>
+    </div>
+    <div class="mo-body">
+      <div class="fg"><label class="fl">Код промокода *</label><input class="fi" id="pr-code" placeholder="ЛЕТО2026" style="text-transform:uppercase"></div>
+      <div class="fg">
+        <label class="fl">Тип скидки *</label>
+        <select class="fsel" id="pr-type" onchange="updatePromoValueLabel()">
+          <option value="fixed">Фиксированная сумма (₽)</option>
+          <option value="percent">Процент (%)</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl" id="pr-value-label">Сумма скидки (₽) *</label><input class="fi" id="pr-value" type="number" placeholder="500"></div>
+      <div class="fg"><label class="fl">Действует до (необязательно)</label><input class="fi" id="pr-until" type="date"><div class="fhint">Оставьте пустым — промокод бессрочный</div></div>
+      <div class="fg" style="display:flex;align-items:center;gap:12px">
+        <label class="toggle"><input type="checkbox" id="pr-active" checked><span class="tsl"></span></label>
+        <span style="font-size:14px;color:var(--text-s)">Активен</span>
+      </div>
+    </div>
+    <div class="mo-foot">
+      <button class="btn btn-g" onclick="closeMoPromo()">Отмена</button>
+      <button class="btn btn-p" onclick="savePromo()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
 <div class="notif" id="notif"></div>
 
 <script>
@@ -374,6 +433,8 @@ const GITHUB_REPO = 'maratti';
 const GH_API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/`;
 
 let products = [];
+let promos = [];
+let promotion = null;
 let orders = [];
 let currentOrderId = null;
 
@@ -405,6 +466,7 @@ function goPage(page){
   if(page==='products') renderProducts();
   if(page==='orders') renderOrders();
   if(page==='reviews') renderReviews();
+  if(page==='promos') renderPromos();
   if(page==='dashboard') renderDashboard();
   if(page==='settings'){ const t=getToken(); if(t) document.getElementById('s-token').value=t; }
 }
@@ -665,7 +727,8 @@ function changePwd(){ const p=document.getElementById('s-pwd').value; if(p.lengt
 // ── INIT ──
 // ── REVIEWS ──
 async function loadReviews(){
-  if(!getToken()){ reviews=JSON.parse(localStorage.getItem('maratti_reviews')||'[]'); renderReviews(); return; }
+  if(!getToken()){ reviews=JSON.parse(localStorage.getItem('maratti_reviews')||'[]');
+  try{const pd=JSON.parse(localStorage.getItem('maratti_promos')||'{}');promos=pd.promos||[];promotion=pd.promotion||null;}catch(e){} renderReviews(); return; }
   showNotif('⏳ Загружаю отзывы...');
   try {
     const fd = await ghGet('reviews.json');
@@ -674,7 +737,8 @@ async function loadReviews(){
     localStorage.setItem('maratti_reviews',JSON.stringify(reviews));
     renderReviews(); renderDashboard();
     showNotif('✅ Отзывы загружены!');
-  } catch(e){ reviews=JSON.parse(localStorage.getItem('maratti_reviews')||'[]'); renderReviews(); }
+  } catch(e){ reviews=JSON.parse(localStorage.getItem('maratti_reviews')||'[]');
+  try{const pd=JSON.parse(localStorage.getItem('maratti_promos')||'{}');promos=pd.promos||[];promotion=pd.promotion||null;}catch(e){} renderReviews(); }
 }
 
 async function saveReviewsToGitHub(){
@@ -813,10 +877,129 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// ── PROMOS ──
+async function loadPromos(){
+  if(!getToken()){
+    const local = localStorage.getItem('maratti_promos');
+    if(local){ const d=JSON.parse(local); promos=d.promos||[]; promotion=d.promotion||null; }
+    renderPromos(); fillPromotion(); return;
+  }
+  showNotif('Загружаю...');
+  try {
+    const fd = await ghGet('promos.json');
+    const d = JSON.parse(fromBase64(fd.content));
+    promos = d.promos||[]; promotion = d.promotion||null;
+    localStorage.setItem('maratti_promos', JSON.stringify(d));
+    renderPromos(); fillPromotion();
+    showNotif('Промокоды загружены');
+  } catch(e){
+    const local = localStorage.getItem('maratti_promos');
+    if(local){ const d=JSON.parse(local); promos=d.promos||[]; promotion=d.promotion||null; }
+    renderPromos(); fillPromotion();
+  }
+}
+
+async function savePromosToGitHub(){
+  if(!getToken()){ showNotif('Введи токен в Настройках!'); return; }
+  showNotif('Сохраняю...');
+  const data = {promos, promotion};
+  try {
+    let sha;
+    try { const fd = await ghGet('promos.json'); sha = fd.sha; } catch(e){ sha = undefined; }
+    await ghPut('promos.json', data, sha, 'update promos');
+    localStorage.setItem('maratti_promos', JSON.stringify(data));
+    showNotif('Промокоды сохранены!');
+  } catch(e){ showNotif('Ошибка: '+e.message); }
+}
+
+function renderPromos(){
+  const el = document.getElementById('pr-table');
+  if(!el) return;
+  const cntEl = document.getElementById('pr-count');
+  if(cntEl) cntEl.textContent = promos.length ? promos.length+' промокодов' : 'Нет промокодов';
+  if(!promos.length){
+    el.innerHTML = '<div class="empty"><div class="empty-ic">🎟</div><div class="empty-t">Промокодов пока нет</div></div>';
+    return;
+  }
+  el.innerHTML = '<div class="tw"><table><thead><tr><th>Код</th><th>Скидка</th><th>Срок</th><th>Статус</th><th>Действия</th></tr></thead><tbody>'+
+    promos.map((p,idx)=>{
+      const discText = p.type==='percent' ? (p.value+'%') : (fmt(p.value)+' ₽');
+      const untilText = p.until ? new Date(p.until).toLocaleDateString('ru-RU') : 'Бессрочно';
+      const expired = p.until && new Date(p.until) < new Date();
+      const statusBadge = expired ? '<span class="badge badge-r">Истёк</span>' : (p.active!==false ? '<span class="badge badge-g">Активен</span>' : '<span class="badge badge-r">Выключен</span>');
+      return '<tr>'+
+        '<td style="font-family:Georgia,serif;font-weight:700;color:var(--gold);font-size:15px">'+p.code+'</td>'+
+        '<td style="font-weight:600">'+discText+'</td>'+
+        '<td style="font-size:12px;color:var(--text-m)">'+untilText+'</td>'+
+        '<td>'+statusBadge+'</td>'+
+        '<td><div class="actions">'+
+        '<button class="btn btn-g btn-sm" onclick="togglePromo('+idx+')">'+(p.active!==false?'Выкл':'Вкл')+'</button>'+
+        '<button class="btn btn-d btn-sm" onclick="deletePromo('+idx+')">Удалить</button>'+
+        '</div></td></tr>';
+    }).join('')+'</tbody></table></div>';
+}
+
+function fillPromotion(){
+  if(!promotion) return;
+  const t=document.getElementById('promo-title'); if(t) t.value=promotion.title||'';
+  const tx=document.getElementById('promo-text'); if(tx) tx.value=promotion.text||'';
+  const a=document.getElementById('promo-active'); if(a) a.checked=promotion.active!==false;
+}
+
+function savePromotion(){
+  promotion = {
+    title: document.getElementById('promo-title').value.trim(),
+    text: document.getElementById('promo-text').value.trim(),
+    active: document.getElementById('promo-active').checked
+  };
+  savePromosToGitHub();
+  showNotif('Акция сохранена!');
+}
+
+function openAddPromo(){
+  document.getElementById('pr-code').value='';
+  document.getElementById('pr-type').value='fixed';
+  document.getElementById('pr-value').value='';
+  document.getElementById('pr-until').value='';
+  document.getElementById('pr-active').checked=true;
+  updatePromoValueLabel();
+  document.getElementById('mo-promo').classList.add('on');
+}
+function closeMoPromo(){ document.getElementById('mo-promo').classList.remove('on'); }
+function updatePromoValueLabel(){
+  const type = document.getElementById('pr-type').value;
+  document.getElementById('pr-value-label').textContent = type==='percent' ? 'Процент скидки (%) *' : 'Сумма скидки (₽) *';
+}
+function savePromo(){
+  const code = document.getElementById('pr-code').value.trim().toUpperCase();
+  const type = document.getElementById('pr-type').value;
+  const value = parseInt(document.getElementById('pr-value').value);
+  const until = document.getElementById('pr-until').value;
+  const active = document.getElementById('pr-active').checked;
+  if(!code){ alert('Введите код'); return; }
+  if(!value || value<=0){ alert('Введите корректную скидку'); return; }
+  if(type==='percent' && value>100){ alert('Процент не может быть больше 100'); return; }
+  promos.push({code, type, value, until, active});
+  closeMoPromo();
+  renderPromos();
+  savePromosToGitHub();
+  showNotif('Промокод добавлен!');
+}
+function togglePromo(idx){
+  if(promos[idx]){ promos[idx].active = promos[idx].active===false; renderPromos(); savePromosToGitHub(); }
+}
+function deletePromo(idx){
+  if(!confirm('Удалить промокод?')) return;
+  promos.splice(idx,1);
+  renderPromos(); savePromosToGitHub();
+  showNotif('Промокод удалён');
+}
+
 function init(){
   products=JSON.parse(localStorage.getItem('maratti_products')||'[]');
   orders=JSON.parse(localStorage.getItem('maratti_orders')||'[]');
   reviews=JSON.parse(localStorage.getItem('maratti_reviews')||'[]');
+  try{const pd=JSON.parse(localStorage.getItem('maratti_promos')||'{}');promos=pd.promos||[];promotion=pd.promotion||null;}catch(e){}
   renderDashboard(); renderProducts();
   const t=getToken(); if(t) document.getElementById('s-token').value=t;
   if(getToken()) loadOrders();
