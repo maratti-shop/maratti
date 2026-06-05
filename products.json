@@ -398,5 +398,39 @@
     "reviews": 0,
     "active": true,
     "id": 1780687133447
+  },
+  {
+    "name": "Туфли натуральная кожа",
+    "cat": "shoes",
+    "catName": "Туфли · Кожа",
+    "color": "Черный",
+    "material": "Натуральная кожа",
+    "price": 5100,
+    "old": 17899,
+    "wb": 6800,
+    "disc": 72,
+    "sizes": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45
+    ],
+    "art": "527813693",
+    "photo": "https://basket-28.wbbasket.ru/vol5278/part527813/527813693/images/big/1.webp",
+    "photos": [
+      "https://basket-28.wbbasket.ru/vol5278/part527813/527813693/images/big/1.webp",
+      "https://basket-28.wbbasket.ru/vol5278/part527813/527813693/images/big/3.webp",
+      "https://basket-28.wbbasket.ru/vol5278/part527813/527813693/images/big/5.webp",
+      "ebphttps://basket-28.wbbasket.ru/vol5278/part527813/527813693/images/big/4.webp",
+      "https://basket-28.wbbasket.ru/vol5278/part527813/527813693/images/big/4.webp",
+      "https://basket-28.wbbasket.ru/vol5278/part527813/527813693/images/big/9.webp"
+    ],
+    "desc": "",
+    "rating": 4.9,
+    "reviews": 0,
+    "active": true,
+    "id": 1780687414950
   }
 ]
