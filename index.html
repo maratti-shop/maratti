@@ -699,7 +699,7 @@ const BOT_TOKEN = '8737124576:AAF45XAKXziRVl2sSSgHuU-o6Rtaio33JBs';
 const OWNER_ID = '1258838821';
 const GITHUB_OWNER = 'maratti-shop';
 const GITHUB_REPO = 'maratti';
-const GH_TOKEN = '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';
+// GH_TOKEN убран из кода по соображениям безопасности
 
 let PRODUCTS = [];
 let activeCat = 'all';
@@ -1039,33 +1039,16 @@ async function submitOrder(){
       items:cart.map(i=>({name:i.name,color:i.color||'',size:i.size,price:i.price,art:i.art||''})),
       sum,deliveryCost:delCost,total
     };
-    // Сохраняем заказ напрямую на GitHub
+    // Отправляем данные заказа боту для сохранения
     try {
-      // Читаем текущий orders.json
-      const r1 = await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/orders.json',{
-        headers:{'Authorization':'Bearer '+GH_TOKEN,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},
-        cache:'no-store'
+      // Отправляем JSON заказа боту — он обработает и сохранит в GitHub
+      const _orderMsg = 'NEW_ORDER:' + JSON.stringify(orderData);
+      await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({chat_id: parseInt(OWNER_ID), text: _orderMsg})
       });
-      if(r1.ok){
-        const fd = await r1.json();
-        let existing = [];
-        try{ existing = JSON.parse(atob(fd.content.replace(/\n/g,''))); }catch(e){}
-        if(!Array.isArray(existing)) existing = [];
-        existing.push(orderData);
-        // Записываем обновлённый orders.json
-        await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/orders.json',{
-          method:'PUT',
-          headers:{'Authorization':'Bearer '+GH_TOKEN,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},
-          body: JSON.stringify({
-            message:'order '+orderData.num,
-            content: btoa(unescape(encodeURIComponent(JSON.stringify(existing,null,2)))),
-            sha: fd.sha
-          })
-        });
-        console.log('✅ Заказ сохранён на GitHub');
-      }
-    } catch(e){ console.log('❌ GitHub save error:', e); }
-    
+    } catch(e){ console.log('order relay error:', e); }
+
     // Сохраняем в localStorage для "Мои заказы" (мгновенно)
     try {
       const savedOrders = JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
