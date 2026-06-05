@@ -1021,25 +1021,33 @@ async function submitOrder(){
       }
     }
 
-    // Сохраняем заказ в orders.json
-    const ghToken = localStorage.getItem('gh_token')||'';
-    if(ghToken){
-      try {
-        const r1 = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/orders.json`,{
-          headers:{'Authorization':'Bearer '+ghToken,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},cache:'no-store'
-        });
-        if(r1.ok){
-          const fd = await r1.json();
-          let existing = [];
-          try{ existing=JSON.parse(atob(fd.content.replace(/\n/g,''))); }catch(e){}
-          existing.push({id:orderId,num:'#'+String(orderId).slice(-6),date:new Date().toLocaleString('ru-RU'),status:'new',name,lastname:last,phone,ozonPhone:ozon,tgUsername,tgId,deliveryType:delTypes[selDel_],city,address:addr,comment,items:cart.map(i=>({name:i.name,color:i.color||'',size:i.size,price:i.price,art:i.art||''})),sum,deliveryCost:delCost,total});
-          await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/orders.json`,{
-            method:'PUT', headers:{'Authorization':'Bearer '+ghToken,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},
-            body:JSON.stringify({message:'new order',content:btoa(unescape(encodeURIComponent(JSON.stringify(existing,null,2)))),sha:fd.sha})
-          });
-        }
-      } catch(e){ console.log('orders save err',e); }
-    }
+    // Сохраняем заказ — отправляем боту специальное сообщение
+    // Бот получит его и сохранит в orders.json на GitHub
+    const orderData = {
+      id:orderId,
+      num:'#'+String(orderId).slice(-6),
+      date:new Date().toLocaleString('ru-RU'),
+      status:'new',
+      name,lastname:last,phone,
+      ozonPhone:ozon,
+      tgUsername,tgId,
+      deliveryType:delTypes[selDel_],
+      city,address:addr,comment,
+      items:cart.map(i=>({name:i.name,color:i.color||'',size:i.size,price:i.price,art:i.art||''})),
+      sum,deliveryCost:delCost,total
+    };
+    try {
+      // Отправляем данные заказа владельцу через бота (бот сохранит в orders.json)
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          chat_id: OWNER_ID,
+          text: '📦ORDER_DATA:' + JSON.stringify(orderData),
+          parse_mode: null
+        })
+      });
+    } catch(e){ console.log('order data send err', e); }
   } catch(e){ console.log('submit err',e); }
 
   // Сохраняем использованный промокод
