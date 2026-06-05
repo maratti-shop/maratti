@@ -1036,18 +1036,25 @@ async function submitOrder(){
       items:cart.map(i=>({name:i.name,color:i.color||'',size:i.size,price:i.price,art:i.art||''})),
       sum,deliveryCost:delCost,total
     };
+    // Сохраняем заказ — отправляем боту и сохраняем локально
     try {
-      // Отправляем данные заказа владельцу через бота (бот сохранит в orders.json)
+      // 1. Отправляем боту чтобы он сохранил на GitHub
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
-          chat_id: OWNER_ID,
-          text: '📦ORDER_DATA:' + JSON.stringify(orderData),
-          parse_mode: null
+          chat_id: parseInt(OWNER_ID),
+          text: '📦ORDER_DATA:' + JSON.stringify(orderData)
         })
       });
-    } catch(e){ console.log('order data send err', e); }
+    } catch(e){ console.log('order send err', e); }
+    
+    // 2. Сохраняем в localStorage для отображения в "Мои заказы"
+    try {
+      const savedOrders = JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
+      savedOrders.unshift(orderData);
+      localStorage.setItem('my_orders_'+String(tgId), JSON.stringify(savedOrders.slice(0,50)));
+    } catch(e){}
   } catch(e){ console.log('submit err',e); }
 
   // Сохраняем использованный промокод
