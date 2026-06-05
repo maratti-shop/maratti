@@ -786,93 +786,32 @@ function fmt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '); }
 
 function card(p){
   const fav = favorites.includes(String(p.id));
-  const img = p.photo ? '<img src="'+p.photo+'" alt="'+p.name+'" loading="lazy">' : '<span class="ph">'+'<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 17h20v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2z"/><path d="M2 17l1.5-9 4 2 2-3 3 6 9 1v3"/></svg>'+'</span>';
+  const pid = String(p.id);
+  const img = p.photo
+    ? `<img src="${p.photo}" alt="${p.name}" loading="lazy">`
+    : `<span class="ph"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 17h20v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2z"/><path d="M2 17l1.5-9 4 2 2-3 3 6 9 1v3"/></svg></span>`;
   const disc = p.old && p.price ? Math.round((1-p.price/p.old)*100) : (p.disc||0);
   const wb = p.wb||0;
-  const discHtml = disc ? '<div class="p-disc">−'+disc+'%</div>' : '';
-  const oldHtml = p.old ? '<span class="p-old">'+fmt(p.old)+' ₽</span>' : '';
-  const wbHtml = wb ? '<div class="p-wb">Выгода '+fmt(wb-p.price)+' ₽ vs WB</div>' : '';
-  return '<div class="product reveal" onclick="openProduct('+JSON.stringify(p.id)+')">'+
-    '<div class="product-img">'+discHtml+
-    '<div class="p-fav '+(fav?'on':'')+'" onclick="event.stopPropagation();toggleFav(\"'+String(p.id)+'\",event)">'+(fav?'♥':'♡')+'</div>'+
-    img+'</div>'+
-    '<div class="p-info">'+
-    '<div class="p-cat">'+catName(p.cat)+'</div>'+
-    '<div class="p-name">'+p.name+'</div>'+
-    '<div class="p-rate"><span class="star">★</span> '+(p.rating||'5.0')+' · '+(p.reviews||0)+'</div>'+
-    '<div class="p-bottom"><div class="p-prices">'+
-    '<span class="p-new">'+fmt(p.price)+' ₽</span>'+oldHtml+wbHtml+
-    '</div>'+
-    '<button class="p-add" onclick="event.stopPropagation();quickAdd('+JSON.stringify(p.id)+')">+</button>'+
-    '</div></div></div>';
-}
-
-function renderProducts(){
-  const q = (document.getElementById('search').value||'').toLowerCase();
-  let list = PRODUCTS.filter(p=> activeCat==='all'||p.cat===activeCat);
-  if(q) list = list.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.color||'').toLowerCase().includes(q));
-  const cntEl = document.getElementById('prod-count');
-  if(cntEl) cntEl.textContent = list.length;
-  const el = document.getElementById('products');
-  if(!PRODUCTS.length){
-    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-m)">
-      <div style="margin-bottom:12px;opacity:.2;color:var(--txt-3)"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 17h20v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2z"/><path d="M2 17l1.5-9 4 2 2-3 3 6 9 1v3"/></svg></div>
-      <div style="font-family:'Marcellus',Georgia,serif;font-size:16px;color:var(--text-s);margin-bottom:6px">Товары скоро появятся</div>
-      <div style="font-size:13px">Следите за обновлениями</div></div>`;
-  } else if(!list.length){
-    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-m)">Ничего не найдено</div>`;
-  } else {
-    el.innerHTML = list.map(card).join('');
-    setTimeout(initReveal, 50);
-    setTimeout(initLiquidGlass, 60);
-  }
-}
-
-// ── FAVORITES ──
-function toggleFav(id, ev){
-  id = String(id);
-  const i = favorites.map(String).indexOf(id);
-  favorites = favorites.map(String);
-  const adding = i===-1;
-  adding ? favorites.push(id) : favorites.splice(i,1);
-  try { localStorage.setItem('maratti_favorites', JSON.stringify(favorites)); } catch(e){}
-  updateBadges(); renderProducts(); renderFavorites();
-  if(adding){
-    showToast('Добавлено в избранное');
-    // Плавающее сердце от места клика
-    if(ev){
-      const heart = document.createElement('div');
-      heart.className = 'heart-float';
-      heart.textContent = '♥';
-      heart.style.left = (ev.clientX-14)+'px';
-      heart.style.top = (ev.clientY-14)+'px';
-      document.body.appendChild(heart);
-      setTimeout(()=>heart.remove(), 900);
-    }
-  }
-}
-function renderFavorites(){
-  const el = document.getElementById('fav-products');
-  const empty = document.getElementById('fav-empty');
-  if(!el) return;
-  if(!PRODUCTS.length){
-    // Товары ещё не загружены — показываем загрузку и ждём
-    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--txt-3);font-size:14px">Загрузка...</div>';
-    if(empty) empty.style.display = 'none';
-    loadProducts().then(()=>{
-      const list = PRODUCTS.filter(p=>favorites.includes(String(p.id)));
-      el.innerHTML = list.map(card).join('');
-      if(empty) empty.style.display = list.length ? 'none' : 'block';
-      setTimeout(initReveal, 50);
-      setTimeout(initLiquidGlass, 60);
-    });
-    return;
-  }
-  const list = PRODUCTS.filter(p=>favorites.includes(String(p.id)));
-  el.innerHTML = list.map(card).join('');
-  if(empty) empty.style.display = list.length ? 'none' : 'block';
-  setTimeout(initReveal, 50);
-  setTimeout(initLiquidGlass, 60);
+  const discHtml = disc ? `<div class="p-disc">−${disc}%</div>` : '';
+  const oldHtml = p.old ? `<span class="p-old">${fmt(p.old)} ₽</span>` : '';
+  const wbHtml = wb ? `<div class="p-wb">Выгода ${fmt(wb-p.price)} ₽ vs WB</div>` : '';
+  return `<div class="product reveal" onclick="openProduct('${pid}')">
+    <div class="product-img">${discHtml}
+      <div class="p-fav ${fav?'on':''}" onclick="event.stopPropagation();toggleFav('${pid}',event)">${fav?'♥':'♡'}</div>
+      ${img}
+    </div>
+    <div class="p-info">
+      <div class="p-cat">${catName(p.cat)}</div>
+      <div class="p-name">${p.name}</div>
+      <div class="p-rate"><span class="star">★</span> ${p.rating||'5.0'} · ${p.reviews||0}</div>
+      <div class="p-bottom">
+        <div class="p-prices">
+          <span class="p-new">${fmt(p.price)} ₽</span>${oldHtml}${wbHtml}
+        </div>
+        <button class="p-add" onclick="event.stopPropagation();quickAdd('${pid}')">+</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 // ── PRODUCT MODAL ──

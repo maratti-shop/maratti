@@ -1424,13 +1424,28 @@ async function loadBotStats(){
     const r = await fetch('https://raw.githubusercontent.com/maratti-shop/maratti/main/users.json?t='+Date.now());
     if(r.ok){
       const users = await r.json();
-      const count = Object.keys(users).length;
-      document.getElementById('bs-users').textContent = count;
-      const active = Object.values(users).filter(u=>!u.blocked).length;
-      document.getElementById('bs-new').textContent = Object.values(users)
-        .filter(u=>u.joined && u.joined.includes(new Date().toLocaleDateString('ru-RU').split('.').reverse().join('.'))).length;
+      const ulist = Object.values(users);
+      document.getElementById('bs-users').textContent = ulist.length;
+      const today = new Date().toLocaleDateString('ru-RU');
+      const newToday = ulist.filter(u=>u.joined&&u.joined.startsWith(today.split('.').reverse().join('-').slice(0,7))).length;
+      document.getElementById('bs-new').textContent = newToday;
+      const hint2 = document.getElementById('bs-hint');
+      if(hint2) hint2.style.display='none';
+      // Сохраняем для рассылки
+      window._usersCache = users;
+    } else {
+      // users.json не на GitHub — показываем инструкцию
+      const hint2 = document.getElementById('bs-hint');
+      if(hint2){
+        hint2.style.display='block';
+        hint2.innerHTML='⚠️ users.json ещё не синхронизирован.<br>Добавь <b>GH_TOKEN</b> в переменные Pella и нажми Перезапуск.<br>Бот начнёт заливать данные на GitHub каждые 30 мин.';
+      }
+      document.getElementById('bs-users').textContent = '0';
     }
-  } catch(e){}
+  } catch(e){
+    const hint2 = document.getElementById('bs-hint');
+    if(hint2){ hint2.style.display='block'; hint2.textContent='Нет подключения к GitHub.'; }
+  }
 }
 
 async function loadBroadcastHistory(){
@@ -1481,14 +1496,20 @@ async function sendBroadcast(type){
   progress.style.display='block';
   progress.innerHTML='⏳ Загружаю список подписчиков...';
 
-  let users = {};
-  try {
-    const r = await fetch('https://raw.githubusercontent.com/maratti-shop/maratti/main/users.json?t='+Date.now());
-    if(r.ok) users = await r.json();
-  } catch(e){ progress.innerHTML='❌ Не удалось загрузить users.json. Убедись что файл есть на GitHub.'; return; }
-
+  let users = window._usersCache || null;
+  if(!users){
+    try {
+      const r = await fetch('https://raw.githubusercontent.com/maratti-shop/maratti/main/users.json?t='+Date.now());
+      if(r.ok){ users = await r.json(); window._usersCache = users; }
+    } catch(e){}
+  }
+  if(!users || !Object.keys(users).length){
+    progress.innerHTML='❌ Нет подписчиков.<br>Добавь GH_TOKEN в Pella → бот синхронизирует users.json на GitHub.<br>Или подожди 30 мин после добавления токена.';
+    document.getElementById(btnId).disabled=false;
+    return;
+  }
   const uids = Object.keys(users).filter(uid=>!users[uid].blocked);
-  if(!uids.length){ progress.innerHTML='❌ Нет подписчиков в базе'; return; }
+  if(!uids.length){ progress.innerHTML='❌ Нет активных подписчиков'; return; }
 
   const btnId = type==='text' ? 'bc-btn-text' : 'bc-btn-photo';
   document.getElementById(btnId).disabled=true;
@@ -1610,8 +1631,8 @@ async function loadAnalytics(){
 }
 
 function selectSegment(type){
-  const users = window._analyticsUsers;
-  if(!users){ showNotif('Сначала загрузи аналитику'); return; }
+  const users = window._analyticsUsers || window._usersCache;
+  if(!users){ showNotif('Сначала открой раздел Рассылки или Аналитика'); return; }
   const ulist = Object.values(users);
   const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-30);
   let filtered = [];
