@@ -756,8 +756,61 @@ async function loadFromGitHub(){
       loaded++;
     }
   } catch(e){}
+  // Загружаем users.json для статистики и рассылок
+  try {
+    const fd = await ghGet('users.json');
+    const data = JSON.parse(fromBase64(fd.content));
+    if(data && typeof data === 'object'){
+      window._usersCache = data;
+      const count = Object.keys(data).length;
+      // Обновляем счётчики статистики
+      const bs = document.getElementById('bs-users');
+      if(bs) bs.textContent = count;
+      const hint = document.getElementById('bs-hint');
+      if(hint) hint.style.display = 'none';
+      loaded++;
+    }
+  } catch(e){}
+
+  // Загружаем bot_stats.json
+  try {
+    const fd = await ghGet('bot_stats.json');
+    const data = JSON.parse(fromBase64(fd.content));
+    if(data){
+      const today = new Date().toISOString().split('T')[0];
+      const d = data.daily && data.daily[today] ? data.daily[today] : {};
+      const bsn = document.getElementById('bs-new');
+      if(bsn) bsn.textContent = d.new_users || 0;
+      const bss = document.getElementById('bs-starts');
+      if(bss) bss.textContent = data.starts || 0;
+      loaded++;
+    }
+  } catch(e){}
+
+  // Загружаем broadcasts.json для истории рассылок
+  try {
+    const fd = await ghGet('broadcasts.json');
+    const data = JSON.parse(fromBase64(fd.content));
+    if(Array.isArray(data)){
+      // Обновляем историю если страница рассылок открыта
+      const bcHist = document.getElementById('bc-history');
+      if(bcHist && data.length){
+        bcHist.innerHTML = data.slice(0,8).map(b=>
+          `<div style="padding:12px;background:var(--card2);border-radius:10px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-m);margin-bottom:6px">
+              <span>${b.date} · ${b.type}</span>
+              <span style="color:var(--gold)">✅ ${b.ok}/${b.total}</span>
+            </div>
+            <div style="font-size:13px;color:var(--text-s)">${(b.text||'').substring(0,80)}</div>
+          </div>`
+        ).join('');
+      }
+      loaded++;
+    }
+  } catch(e){}
+
   renderProducts(); renderDashboard(); renderOrders(); renderReviews();
-  showNotif('✅ Загружено: товары, заказы, отзывы, промокоды');
+  showNotif('✅ Данных загружено: ' + loaded + ' файлов');
 }
 
 async function saveToGitHub(){
@@ -1783,49 +1836,31 @@ function deletePromo(idx){
 }
 
 // Читает публичные данные без токена
-async function loadPublicData(){
-  // Если есть токен - используем GitHub API (надёжнее)
-  if(getToken()){ await loadFromGitHub(); return; }
-  
-  // Без токена - читаем через raw.githubusercontent.com
-  const RAW='https://raw.githubusercontent.com/maratti-shop/maratti/main/';
-  let changed=false;
-  const map=[
-    ['products.json', d=>{ if(Array.isArray(d)&&d.length){ products=d; localStorage.setItem('maratti_products',JSON.stringify(d)); changed=true; }}],
-    ['orders.json',   d=>{ if(Array.isArray(d)){ orders=d; localStorage.setItem('maratti_orders',JSON.stringify(d)); changed=true; }}],
-    ['reviews.json',  d=>{ if(Array.isArray(d)){ reviews=d; localStorage.setItem('maratti_reviews',JSON.stringify(d)); changed=true; }}],
-    ['users.json',    d=>{ if(d) window._usersCache=d; }],
-  ];
-  await Promise.allSettled(map.map(async([file,handler])=>{
-    try{
-      const r=await fetch(RAW+file+'?t='+Date.now());
-      if(r.ok) handler(await r.json());
-    }catch(e){}
-  }));
-  if(changed){ renderDashboard(); renderProducts(); renderOrders(); showNotif('✅ Данные загружены!'); }
-  else { showNotif('⚠️ Введи GitHub Token в Настройках для полного доступа'); renderDashboard(); }
-}
+
 
 function init(){
-  // Загружаем из localStorage как начальное состояние
-  products=JSON.parse(localStorage.getItem('maratti_products')||'[]');
-  orders=JSON.parse(localStorage.getItem('maratti_orders')||'[]');
-  reviews=JSON.parse(localStorage.getItem('maratti_reviews')||'[]');
-  try{const pd=JSON.parse(localStorage.getItem('maratti_promos')||'{}');promos=pd.promos||[];promotion=pd.promotion||null;}catch(e){}
-  categories=JSON.parse(localStorage.getItem('maratti_categories')||'[]');
-  
-  // Показываем что есть прямо сейчас
-  renderDashboard(); renderProducts();
-  
-  // Заполняем токены в настройках
+  // 1. Загружаем из localStorage сразу
+  try{ products=JSON.parse(localStorage.getItem('maratti_products')||'[]'); }catch(e){ products=[]; }
+  try{ orders=JSON.parse(localStorage.getItem('maratti_orders')||'[]'); }catch(e){ orders=[]; }
+  try{ reviews=JSON.parse(localStorage.getItem('maratti_reviews')||'[]'); }catch(e){ reviews=[]; }
+  try{ const pd=JSON.parse(localStorage.getItem('maratti_promos')||'{}'); promos=pd.promos||[]; promotion=pd.promotion||null; }catch(e){}
+  try{ categories=JSON.parse(localStorage.getItem('maratti_categories')||'[]'); }catch(e){ categories=[]; }
+
+  // 2. Показываем что есть
+  renderDashboard(); renderProducts(); renderOrders();
+
+  // 3. Заполняем токены
   const t=getToken();
   if(t && document.getElementById('s-token')) document.getElementById('s-token').value=t;
   const bt=getBotToken();
   if(bt && document.getElementById('s-bot-token')) document.getElementById('s-bot-token').value=bt;
-  
-  // Загружаем свежие данные с GitHub
-  loadPublicData();
-  if(getToken()){ loadCategories(); loadHeroSettings(); }
+
+  // 4. Если есть токен — сразу грузим с GitHub
+  if(getToken()){
+    loadFromGitHub();
+  } else {
+    showNotif('⚠️ Введи GitHub Token в Настройках для синхронизации');
+  }
 }
 </script>
 </body>
