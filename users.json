@@ -168,5 +168,22 @@
     "source": "organic",
     "funnel": {},
     "city": ""
+  },
+  "6958232374": {
+    "id": 6958232374,
+    "first_name": "Mirzaev R",
+    "last_name": "︎︎ ︎︎︎︎ ︎︎🌊",
+    "username": "Inglorious_r",
+    "joined": "05.06.2026 20:44",
+    "joined_iso": "2026-06-05T20:44:20.629564",
+    "last_seen": "05.06.2026 20:44",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
   }
 }
