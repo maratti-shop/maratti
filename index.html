@@ -816,7 +816,8 @@ function card(p){
 
 // ── PRODUCT MODAL ──
 function openProduct(id){
-  curProduct = PRODUCTS.find(p=>p.id===id);
+  id = String(id);
+  curProduct = PRODUCTS.find(p=>String(p.id)===id);
   if(!curProduct) return;
   selSize = null; galleryIndex = 0; // reset
   const p = curProduct;
@@ -1385,7 +1386,8 @@ function renderCatBanners(){
 
 // ── QUICK ADD (с карточки) ──
 function quickAdd(id){
-  const p = PRODUCTS.find(x=>x.id===id);
+  id = String(id);
+  const p = PRODUCTS.find(x=>String(x.id)===id);
   if(!p) return;
   const sizes = p.sizes||[];
   if(!sizes.length){ tg.showAlert('Нет доступных размеров'); return; }
