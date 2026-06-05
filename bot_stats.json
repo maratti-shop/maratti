@@ -1,1 +1,10 @@
-{}
+{
+  "starts": 3,
+  "daily": {
+    "2026-06-05": {
+      "starts": 3,
+      "new_users": 3
+    }
+  },
+  "new_users": 3
+}
