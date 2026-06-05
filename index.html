@@ -702,7 +702,7 @@ const GITHUB_REPO = 'maratti';
 
 let PRODUCTS = [];
 let activeCat = 'all';
-let favorites = JSON.parse(localStorage.getItem('maratti_favorites')||'[]');
+let favorites = JSON.parse(localStorage.getItem('maratti_favorites')||'[]').map(String);
 let cart = [];
 let selSize = null;
 let curProduct = null;
@@ -785,7 +785,7 @@ function setCat(id){ activeCat=id; renderCats(); renderProducts(); }
 function fmt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '); }
 
 function card(p){
-  const fav = favorites.includes(p.id);
+  const fav = favorites.includes(String(p.id));
   const img = p.photo ? '<img src="'+p.photo+'" alt="'+p.name+'" loading="lazy">' : '<span class="ph">'+'<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 17h20v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2z"/><path d="M2 17l1.5-9 4 2 2-3 3 6 9 1v3"/></svg>'+'</span>';
   const disc = p.old && p.price ? Math.round((1-p.price/p.old)*100) : (p.disc||0);
   const wb = p.wb||0;
@@ -830,6 +830,7 @@ function renderProducts(){
 
 // ── FAVORITES ──
 function toggleFav(id, ev){
+  id = String(id);
   const i = favorites.indexOf(id);
   const adding = i===-1;
   adding ? favorites.push(id) : favorites.splice(i,1);
@@ -850,7 +851,7 @@ function toggleFav(id, ev){
   }
 }
 function renderFavorites(){
-  const list = PRODUCTS.filter(p=>favorites.includes(p.id));
+  const list = PRODUCTS.filter(p=>favorites.includes(String(p.id)));
   document.getElementById('fav-products').innerHTML = list.map(card).join('');
   document.getElementById('fav-empty').style.display = list.length?'none':'block';
 }

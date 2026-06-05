@@ -257,10 +257,26 @@
       <!-- ORDERS -->
       <div class="page" id="page-orders">
         <div class="mhdr">
-          <div><div class="mhdr-t">Заказы</div><div class="mhdr-s" id="o-count">Нет заказов</div></div>
-          <button class="btn btn-g" onclick="loadOrders()">🔄 Обновить</button>
+          <div><div class="mhdr-t">Заказы</div><div class="mhdr-s" id="orders-count">Загрузка...</div></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-g" onclick="loadOrders()">🔄 Обновить</button>
+          </div>
         </div>
-        <div class="mbody"><div id="o-table"></div></div>
+        <div class="mbody">
+          <div class="order-search-bar">
+            <input class="fi" id="order-search" placeholder="Поиск по имени, номеру, городу..." oninput="renderOrders()" style="flex:1;min-width:180px">
+            <select class="fsel" id="order-status-filter" onchange="renderOrders()">
+              <option value="all">Все статусы</option>
+              <option value="new">🆕 Новые</option>
+              <option value="confirmed">✅ Подтверждённые</option>
+              <option value="packing">📦 Собираются</option>
+              <option value="shipped">🚚 Отправленные</option>
+              <option value="delivered">🎉 Доставленные</option>
+              <option value="cancelled">❌ Отменённые</option>
+            </select>
+          </div>
+          <div id="orders-list"></div>
+        </div>
       </div>
 
       <!-- REVIEWS -->
@@ -644,15 +660,19 @@ function goPage(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   document.getElementById('page-'+page).classList.add('on');
-  document.querySelectorAll('.ni').forEach(n=>{ if(n.textContent.trim().startsWith(page==='dashboard'?'📊':page==='products'?'👞':page==='orders'?'📦':'⚙️')) n.classList.add('on'); });
+  // Подсвечиваем активный пункт меню по onclick
+  document.querySelectorAll('.ni').forEach(n=>{
+    const oc=n.getAttribute('onclick')||'';
+    if(oc.includes("goPage('"+page+"')")) n.classList.add('on');
+  });
   if(page==='products') renderProducts();
-  if(page==='orders') renderOrders();
+  if(page==='orders'){ if(getToken()) loadOrders(); else renderOrders(); }
   if(page==='reviews') renderReviews();
   if(page==='promos') renderPromos();
   if(page==='cats') renderCatsAdmin();
   if(page==='broadcast'){ loadBotStats(); loadBroadcastHistory(); }
   if(page==='analytics') loadAnalytics();
-  if(page==='dashboard') renderDashboard();
+  if(page==='dashboard'){ renderDashboard(); if(getToken()) loadFromGitHub(); }
   if(page==='settings'){ const t=getToken(); if(t) document.getElementById('s-token').value=t; loadHeroSettings(); }
 }
 
@@ -686,27 +706,49 @@ async function ghPut(file, data, sha, msg){
 
 async function loadFromGitHub(){
   if(!getToken()){ showNotif('❌ Введи токен в Настройках!'); return; }
-  showNotif('⏳ Загружаю товары...');
+  showNotif('⏳ Загружаю данные...');
+  let loaded = 0;
+  // Загружаем товары
   try {
     const fd = await ghGet('products.json');
-    let data;
-    try { data = JSON.parse(fromBase64(fd.content)); } catch(e){ data = []; }
-    if(!Array.isArray(data)) data = [];
-    // Проверяем что данные не испорчены — названия должны быть читаемыми
-    const hasGarbled = data.some(p => p.name && /[ÐÑ]/.test(p.name));
-    if(hasGarbled){
-      showNotif('⚠️ На сайте старые данные с ошибками — нажми "Сохранить на сайт" чтобы обновить');
-      return;
+    let data = JSON.parse(fromBase64(fd.content));
+    if(Array.isArray(data) && data.length>0){
+      products = data; save(); loaded++;
     }
-    if(data.length === 0 && products.length > 0){
-      showNotif('⚠️ На сайте пустой каталог — нажми "Сохранить на сайт"');
-      return;
+  } catch(e){}
+  // Загружаем заказы
+  try {
+    const fd = await ghGet('orders.json');
+    let data = JSON.parse(fromBase64(fd.content));
+    if(Array.isArray(data)){
+      orders = data;
+      localStorage.setItem('maratti_orders', JSON.stringify(orders));
+      loaded++;
     }
-    products = data;
-    save();
-    renderProducts(); renderDashboard();
-    showNotif('✅ Товары загружены! '+products.length+' шт.');
-  } catch(e){ showNotif('❌ Ошибка: '+e.message); }
+  } catch(e){}
+  // Загружаем отзывы
+  try {
+    const fd = await ghGet('reviews.json');
+    let data = JSON.parse(fromBase64(fd.content));
+    if(Array.isArray(data)){
+      reviews = data;
+      localStorage.setItem('maratti_reviews', JSON.stringify(reviews));
+      loaded++;
+    }
+  } catch(e){}
+  // Загружаем промокоды
+  try {
+    const fd = await ghGet('promos.json');
+    let data = JSON.parse(fromBase64(fd.content));
+    if(data && data.promos){
+      promos = data.promos||[];
+      promotion = data.promotion||null;
+      localStorage.setItem('maratti_promos', JSON.stringify(data));
+      loaded++;
+    }
+  } catch(e){}
+  renderProducts(); renderDashboard(); renderOrders(); renderReviews();
+  showNotif('✅ Загружено: товары, заказы, отзывы, промокоды');
 }
 
 async function saveToGitHub(){
@@ -866,6 +908,8 @@ function renderOrders(){
   const nb=document.getElementById('nb');
   const newCount=orders.filter(o=>(o.status||'new')==='new').length;
   if(nb){nb.textContent=newCount;nb.style.display=newCount?'flex':'none';}
+  const oc=document.getElementById('orders-count');
+  if(oc) oc.textContent=list.length+' заказов · новых: '+newCount;
   if(!list.length){el.innerHTML='<div class="empty"><div class="empty-t">Заказов нет</div></div>';return;}
   el.innerHTML=list.map(o=>{
     const num=String(o.num||o.id||'').replace('#','');
@@ -1700,7 +1744,7 @@ function init(){
   renderDashboard(); renderProducts();
   const t=getToken(); if(t) document.getElementById('s-token').value=t;
   const bt=getBotToken(); if(bt && document.getElementById('s-bot-token')) document.getElementById('s-bot-token').value=bt;
-  if(getToken()){ loadOrders(); loadCategories(); }
+  if(getToken()){ loadFromGitHub(); loadCategories(); loadHeroSettings(); }
 }
 </script>
 </body>
