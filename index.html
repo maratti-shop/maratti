@@ -699,7 +699,6 @@ const BOT_TOKEN = '8737124576:AAF45XAKXziRVl2sSSgHuU-o6Rtaio33JBs';
 const OWNER_ID = '1258838821';
 const GITHUB_OWNER = 'maratti-shop';
 const GITHUB_REPO = 'maratti';
-// GH_TOKEN убран из кода по соображениям безопасности
 
 let PRODUCTS = [];
 let activeCat = 'all';
@@ -934,8 +933,6 @@ function renderCart(){
 
 // ── FORM ──
 function openForm(){
-  // Обновляем промокоды перед открытием формы
-  loadPromos();
   if(!cart.length) return;
   const sum = cart.reduce((s,i)=>s+i.price,0);
   const del = sum>=5000?0:350;
@@ -1024,8 +1021,7 @@ async function submitOrder(){
       }
     }
 
-    // Сохраняем заказ — отправляем боту специальное сообщение
-    // Бот получит его и сохранит в orders.json на GitHub
+    // Формируем объект заказа
     const orderData = {
       id:orderId,
       num:'#'+String(orderId).slice(-6),
@@ -1039,21 +1035,24 @@ async function submitOrder(){
       items:cart.map(i=>({name:i.name,color:i.color||'',size:i.size,price:i.price,art:i.art||''})),
       sum,deliveryCost:delCost,total
     };
-    // Отправляем данные заказа боту для сохранения
-    try {
-      // Отправляем JSON заказа боту — он обработает и сохранит в GitHub
-      const _orderMsg = 'NEW_ORDER:' + JSON.stringify(orderData);
-      await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({chat_id: parseInt(OWNER_ID), text: _orderMsg})
-      });
-    } catch(e){ console.log('order relay error:', e); }
 
-    // Сохраняем в localStorage для "Мои заказы" (мгновенно)
+    // Отправляем JSON заказа боту — он сохранит в GitHub
     try {
-      const savedOrders = JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
-      savedOrders.unshift(orderData);
-      localStorage.setItem('my_orders_'+String(tgId), JSON.stringify(savedOrders.slice(0,50)));
+      await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          chat_id: parseInt(OWNER_ID),
+          text: 'NEW_ORDER:' + JSON.stringify(orderData)
+        })
+      });
+    } catch(e){ console.log('order relay err', e); }
+
+    // Сохраняем в localStorage — покупатель видит заказ сразу
+    try {
+      const _saved = JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
+      _saved.unshift(orderData);
+      localStorage.setItem('my_orders_'+String(tgId), JSON.stringify(_saved.slice(0,50)));
     } catch(e){}
   } catch(e){ console.log('submit err',e); }
 
@@ -1116,11 +1115,12 @@ let appliedPromo = null;
 
 async function loadPromos(){
   try {
-    const r = await fetch(GITHUB_RAW+'promos.json?nc='+Date.now());
+    const r = await fetch(GITHUB_RAW+'promos.json?t='+Date.now());
     const d = await r.json();
     PROMO_CODES = {};
     (d.promos||[]).forEach(p=>{
       if(p.active===false) return;
+      // Проверка срока
       if(p.until){ const u=new Date(p.until); if(u < new Date()) return; }
       PROMO_CODES[p.code.toUpperCase()] = {
         type: p.type||'fixed',
@@ -1131,6 +1131,7 @@ async function loadPromos(){
     PROMOTION = d.promotion||null;
     updatePromoStory();
   } catch(e){
+    // Fallback на дефолтные
     PROMO_CODES = {'ИНСТА':{type:'fixed',value:500,desc:'Скидка 500 ₽'}};
   }
 }
