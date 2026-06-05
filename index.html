@@ -1551,6 +1551,71 @@ async function loadMyOrders(){
   }
 }
 
+
+// ── PRODUCTS RENDER ──
+function renderProducts(){
+  const q = (document.getElementById('search')||{value:''}).value.toLowerCase();
+  let list = PRODUCTS.filter(p => activeCat==='all' || p.cat===activeCat);
+  if(q) list = list.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.cat||'').toLowerCase().includes(q));
+  const el = document.getElementById('products');
+  if(!el) return;
+  const cntEl = document.getElementById('prod-count');
+  if(cntEl) cntEl.textContent = list.length;
+  if(!list.length){
+    el.innerHTML = '<div class="empty"><div class="empty-ic"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div><div class="empty-t">Товаров не найдено</div></div>';
+    return;
+  }
+  el.innerHTML = list.map(card).join('');
+  setTimeout(initReveal, 50);
+  setTimeout(initLiquidGlass, 60);
+}
+
+// ── FAVORITES ──
+function toggleFav(id, ev){
+  id = String(id);
+  favorites = favorites.map(String);
+  const i = favorites.indexOf(id);
+  const adding = i === -1;
+  adding ? favorites.push(id) : favorites.splice(i, 1);
+  try { localStorage.setItem('maratti_favorites', JSON.stringify(favorites)); } catch(e){}
+  updateBadges();
+  renderProducts();
+  renderFavorites();
+  if(adding){
+    showToast('Добавлено в избранное');
+    if(ev){
+      const heart = document.createElement('div');
+      heart.className = 'heart-float';
+      heart.textContent = '♥';
+      heart.style.left = (ev.clientX-14)+'px';
+      heart.style.top = (ev.clientY-14)+'px';
+      document.body.appendChild(heart);
+      setTimeout(()=>heart.remove(), 900);
+    }
+  }
+}
+
+function renderFavorites(){
+  const el = document.getElementById('fav-products');
+  const empty = document.getElementById('fav-empty');
+  if(!el) return;
+  if(!PRODUCTS.length){
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--txt-3);font-size:14px">Загрузка...</div>';
+    if(empty) empty.style.display = 'none';
+    loadProducts().then(()=>{
+      const list = PRODUCTS.filter(p => favorites.includes(String(p.id)));
+      el.innerHTML = list.map(card).join('');
+      if(empty) empty.style.display = list.length ? 'none' : 'block';
+      setTimeout(initReveal, 50);
+    });
+    return;
+  }
+  const list = PRODUCTS.filter(p => favorites.includes(String(p.id)));
+  el.innerHTML = list.map(card).join('');
+  if(empty) empty.style.display = list.length ? 'none' : 'block';
+  setTimeout(initReveal, 50);
+}
+
 // ── INIT ──
 loadProducts();
 loadPromos();
