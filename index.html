@@ -794,7 +794,7 @@ function card(p){
   const wbHtml = wb ? '<div class="p-wb">Выгода '+fmt(wb-p.price)+' ₽ vs WB</div>' : '';
   return '<div class="product reveal" onclick="openProduct('+JSON.stringify(p.id)+')">'+
     '<div class="product-img">'+discHtml+
-    '<div class="p-fav '+(fav?'on':'')+'" onclick="event.stopPropagation();toggleFav('+JSON.stringify(p.id)+',event)">'+(fav?'♥':'♡')+'</div>'+
+    '<div class="p-fav '+(fav?'on':'')+'" onclick="event.stopPropagation();toggleFav(\"'+String(p.id)+'\",event)">'+(fav?'♥':'♡')+'</div>'+
     img+'</div>'+
     '<div class="p-info">'+
     '<div class="p-cat">'+catName(p.cat)+'</div>'+
@@ -831,7 +831,8 @@ function renderProducts(){
 // ── FAVORITES ──
 function toggleFav(id, ev){
   id = String(id);
-  const i = favorites.indexOf(id);
+  const i = favorites.map(String).indexOf(id);
+  favorites = favorites.map(String);
   const adding = i===-1;
   adding ? favorites.push(id) : favorites.splice(i,1);
   try { localStorage.setItem('maratti_favorites', JSON.stringify(favorites)); } catch(e){}
@@ -851,9 +852,27 @@ function toggleFav(id, ev){
   }
 }
 function renderFavorites(){
+  const el = document.getElementById('fav-products');
+  const empty = document.getElementById('fav-empty');
+  if(!el) return;
+  if(!PRODUCTS.length){
+    // Товары ещё не загружены — показываем загрузку и ждём
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--txt-3);font-size:14px">Загрузка...</div>';
+    if(empty) empty.style.display = 'none';
+    loadProducts().then(()=>{
+      const list = PRODUCTS.filter(p=>favorites.includes(String(p.id)));
+      el.innerHTML = list.map(card).join('');
+      if(empty) empty.style.display = list.length ? 'none' : 'block';
+      setTimeout(initReveal, 50);
+      setTimeout(initLiquidGlass, 60);
+    });
+    return;
+  }
   const list = PRODUCTS.filter(p=>favorites.includes(String(p.id)));
-  document.getElementById('fav-products').innerHTML = list.map(card).join('');
-  document.getElementById('fav-empty').style.display = list.length?'none':'block';
+  el.innerHTML = list.map(card).join('');
+  if(empty) empty.style.display = list.length ? 'none' : 'block';
+  setTimeout(initReveal, 50);
+  setTimeout(initLiquidGlass, 60);
 }
 
 // ── PRODUCT MODAL ──

@@ -461,6 +461,15 @@
             <button class="btn btn-save" onclick="saveHeroSettings()">Сохранить баннер</button>
           </div>
           <div class="tw" style="padding:24px;margin-bottom:16px">
+            <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:12px">Статус подключения</div>
+            <div id="connection-status" style="font-size:13px;line-height:2">
+              <div>GitHub токен: <span id="st-gh" style="font-weight:600">⏳ проверка...</span></div>
+              <div>Bot Token: <span id="st-bot" style="font-weight:600">⏳ проверка...</span></div>
+              <div>Бот в Telegram: <span id="st-tg" style="font-weight:600">⏳ проверка...</span></div>
+            </div>
+            <button class="btn btn-g btn-sm" onclick="checkConnections()" style="margin-top:10px">🔄 Проверить</button>
+          </div>
+          <div class="tw" style="padding:24px;margin-bottom:16px">
             <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:16px">Магазин</div>
             <div class="fg"><label class="fl">Телефон</label><input class="fi" value="+7 (989) 476-20-89" id="s-phone"></div>
             <div class="fg"><label class="fl">Бесплатная доставка от (₽)</label><input class="fi" value="5000" id="s-free" type="number"></div>
@@ -673,7 +682,7 @@ function goPage(page){
   if(page==='broadcast'){ loadBotStats(); loadBroadcastHistory(); }
   if(page==='analytics') loadAnalytics();
   if(page==='dashboard'){ renderDashboard(); if(getToken()) loadFromGitHub(); }
-  if(page==='settings'){ const t=getToken(); if(t) document.getElementById('s-token').value=t; loadHeroSettings(); }
+  if(page==='settings'){ const t=getToken(); if(t) document.getElementById('s-token').value=t; const bt=getBotToken(); if(bt&&document.getElementById('s-bot-token')) document.getElementById('s-bot-token').value=bt; loadHeroSettings(); setTimeout(checkConnections,300); }
 }
 
 // ── GITHUB ──
@@ -1020,6 +1029,55 @@ function saveSettings(){
   const bt=document.getElementById('s-bot-token').value.trim();
   if(bt) localStorage.setItem('bot_token',bt);
   showNotif('✅ Настройки сохранены!');
+  setTimeout(checkConnections, 500);
+}
+
+async function checkConnections(){
+  // Проверяем GitHub токен
+  const gh = getToken();
+  const stGh = document.getElementById('st-gh');
+  if(!gh){
+    if(stGh) stGh.innerHTML = '<span style="color:var(--red)">❌ Не введён</span>';
+  } else {
+    if(stGh) stGh.innerHTML = '<span style="color:var(--gold)">⏳ проверка...</span>';
+    try {
+      const r = await fetch('https://api.github.com/repos/maratti-shop/maratti',{
+        headers:{'Authorization':'Bearer '+gh}
+      });
+      if(r.ok){
+        if(stGh) stGh.innerHTML = '<span style="color:#4a8a64">✅ Подключён (maratti-shop/maratti)</span>';
+      } else {
+        if(stGh) stGh.innerHTML = '<span style="color:var(--red)">❌ Ошибка токена</span>';
+      }
+    } catch(e){
+      if(stGh) stGh.innerHTML = '<span style="color:var(--red)">❌ Ошибка сети</span>';
+    }
+  }
+
+  // Проверяем Bot Token
+  const bt = getBotToken();
+  const stBot = document.getElementById('st-bot');
+  const stTg = document.getElementById('st-tg');
+  if(!bt){
+    if(stBot) stBot.innerHTML = '<span style="color:var(--red)">❌ Не введён</span>';
+    if(stTg) stTg.innerHTML = '<span style="color:var(--text-m)">— нужен Bot Token</span>';
+  } else {
+    if(stBot) stBot.innerHTML = '<span style="color:var(--gold)">⏳ проверка...</span>';
+    try {
+      const r = await fetch('https://api.telegram.org/bot'+bt+'/getMe');
+      const d = await r.json();
+      if(d.ok){
+        const name = d.result.username || d.result.first_name;
+        if(stBot) stBot.innerHTML = '<span style="color:#4a8a64">✅ Подключён</span>';
+        if(stTg) stTg.innerHTML = '<span style="color:#4a8a64">✅ @'+name+' работает</span>';
+      } else {
+        if(stBot) stBot.innerHTML = '<span style="color:var(--red)">❌ Неверный токен</span>';
+        if(stTg) stTg.innerHTML = '<span style="color:var(--red)">❌ Ошибка</span>';
+      }
+    } catch(e){
+      if(stBot) stBot.innerHTML = '<span style="color:var(--red)">❌ Ошибка сети</span>';
+    }
+  }
 }
 function getBotToken(){ return localStorage.getItem('bot_token')||''; }
 function changePwd(){ const p=document.getElementById('s-pwd').value; if(p.length<4){ alert('Минимум 4 символа'); return; } localStorage.setItem('admin_pwd',p); document.getElementById('s-pwd').value=''; showNotif('✅ Пароль изменён!'); }
