@@ -244,7 +244,7 @@
         <div class="mhdr">
           <div><div class="mhdr-t">Товары</div><div class="mhdr-s" id="p-count">0 товаров</div></div>
           <div style="display:flex;gap:10px">
-            <button class="btn btn-g" onclick="loadFromGitHub()">🔄 Обновить</button>
+            <button class="btn btn-g" onclick="loadPublicData()">🔄 Обновить</button>
             <button class="btn btn-p" onclick="openAddProduct()">+ Добавить</button>
             <button class="btn btn-save" onclick="saveToGitHub()">🚀 Сохранить на сайт</button>
           </div>
@@ -259,7 +259,7 @@
         <div class="mhdr">
           <div><div class="mhdr-t">Заказы</div><div class="mhdr-s" id="orders-count">Загрузка...</div></div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn btn-g" onclick="loadOrders()">🔄 Обновить</button>
+            <button class="btn btn-g" onclick="loadPublicData()">🔄 Обновить</button>
           </div>
         </div>
         <div class="mbody">
@@ -668,7 +668,7 @@ function logout(){ document.getElementById('login-screen').style.display='block'
 function goPage(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  document.getElementById('page-'+page).classList.add('on');
+  const _pe=document.getElementById('page-'+page); if(_pe) _pe.classList.add('on');
   // Подсвечиваем активный пункт меню по onclick
   document.querySelectorAll('.ni').forEach(n=>{
     const oc=n.getAttribute('onclick')||'';
@@ -791,20 +791,15 @@ async function saveOrdersToGitHub(){
 
 // ── DASHBOARD ──
 function renderDashboard(){
-  document.getElementById('s-products').textContent = products.filter(p=>p.active!==false).length;
-  document.getElementById('s-orders').textContent = orders.length;
-  const nw = orders.filter(o=>o.status==='new').length;
-  document.getElementById('s-new').textContent = nw+' новых';
-  document.getElementById('s-revenue').textContent = fmt(orders.reduce((s,o)=>s+(o.total||0),0))+' ₽';
-  const nb = document.getElementById('nb');
-  if(nw){ nb.style.display='inline'; nb.textContent=nw; } else { nb.style.display='none'; }
-  const last = [...orders].reverse().slice(0,5);
-  const el = document.getElementById('dash-orders');
-  if(!last.length){ el.innerHTML='<div class="empty"><div class="empty-ic">📦</div><div class="empty-t">Заказов пока нет</div></div>'; return; }
-  el.innerHTML='<table><thead><tr><th>№</th><th>Покупатель</th><th>Сумма</th><th>Статус</th></tr></thead><tbody>'+
-    last.map(o=>`<tr onclick="openOrder(${o.id})"><td>#${String(o.id).slice(-6)}</td><td><div style="font-weight:500">${o.name||''} ${o.lastname||''}</div><div style="font-size:11px;color:var(--text-m)">${o.phone||''}</div></td><td style="color:var(--gold);font-family:Georgia,serif;font-weight:700">${fmt(o.total||0)} ₽</td><td><span class="os os-${o.status}">${statusLabel(o.status)}</span></td></tr>`).join('')+
-    '</tbody></table>';
+  const sp=document.getElementById('s-products'); if(sp) sp.textContent=products.filter(p=>p.active!==false).length;
+  const so=document.getElementById('s-orders'); if(so) so.textContent=orders.length;
+  const nw=orders.filter(o=>(o.status||'new')==='new').length;
+  const sn=document.getElementById('s-new'); if(sn) sn.textContent=nw+' новых';
+  const rev=orders.reduce((s,o)=>s+(o.total||0),0);
+  const sr=document.getElementById('s-revenue'); if(sr) sr.textContent=fmt(rev)+' ₽';
+  const srv=document.getElementById('s-reviews'); if(srv) srv.textContent=reviews.filter(r=>r.active!==false).length;
 }
+
 
 function statusLabel(s){ return s==='new'?'🆕 Новый':s==='confirmed'?'✅ Подтверждён':s==='cancelled'?'❌ Отменён':'✔️ Выполнен'; }
 
@@ -1390,63 +1385,36 @@ async function getBotInfo(){
 }
 
 async function loadBotStats(){
-  const hint = document.getElementById('bs-hint');
-  const token = getBotToken();
-  if(!token){
-    if(hint) hint.style.display='block';
-    return;
-  }
-  if(hint) hint.style.display='none';
-
-  // Получаем инфо о боте
-  const info = await getBotInfo();
-  if(info){
-    document.getElementById('bs-users').textContent = '—';
-    document.getElementById('bs-new').textContent = '—';
-    document.getElementById('bs-starts').textContent = '—';
-  }
-
-  // Загружаем статистику из bot_stats.json на GitHub
-  try {
-    const r = await fetch('https://raw.githubusercontent.com/maratti-shop/maratti/main/bot_stats.json?t='+Date.now());
+  const RAW='https://raw.githubusercontent.com/maratti-shop/maratti/main/';
+  const hint=document.getElementById('bs-hint');
+  
+  // Загружаем users.json напрямую через raw (публичный)
+  try{
+    const r=await fetch(RAW+'users.json?t='+Date.now());
     if(r.ok){
-      const stats = await r.json();
-      const today = new Date().toISOString().split('T')[0];
-      const d = stats.daily&&stats.daily[today] ? stats.daily[today] : {};
-      document.getElementById('bs-users').textContent = stats.total_users||'—';
-      document.getElementById('bs-new').textContent = d.new_users||0;
-      document.getElementById('bs-starts').textContent = stats.starts||'—';
-    }
-  } catch(e){}
-
-  // Загружаем users.json для подсчёта
-  try {
-    const r = await fetch('https://raw.githubusercontent.com/maratti-shop/maratti/main/users.json?t='+Date.now());
-    if(r.ok){
-      const users = await r.json();
-      const ulist = Object.values(users);
-      document.getElementById('bs-users').textContent = ulist.length;
-      const today = new Date().toLocaleDateString('ru-RU');
-      const newToday = ulist.filter(u=>u.joined&&u.joined.startsWith(today.split('.').reverse().join('-').slice(0,7))).length;
-      document.getElementById('bs-new').textContent = newToday;
-      const hint2 = document.getElementById('bs-hint');
-      if(hint2) hint2.style.display='none';
-      // Сохраняем для рассылки
-      window._usersCache = users;
+      const users=await r.json();
+      window._usersCache=users;
+      const ulist=Object.values(users);
+      const total=ulist.length;
+      const today=new Date().toLocaleDateString('ru-RU');
+      const newToday=ulist.filter(u=>u.joined&&u.joined.startsWith(today)).length;
+      const starts_el=document.getElementById('bs-starts');
+      if(document.getElementById('bs-users')) document.getElementById('bs-users').textContent=total;
+      if(document.getElementById('bs-new')) document.getElementById('bs-new').textContent=newToday;
+      if(starts_el) starts_el.textContent=total;
+      if(hint) hint.style.display='none';
     } else {
-      // users.json не на GitHub — показываем инструкцию
-      const hint2 = document.getElementById('bs-hint');
-      if(hint2){
-        hint2.style.display='block';
-        hint2.innerHTML='⚠️ users.json ещё не синхронизирован.<br>Добавь <b>GH_TOKEN</b> в переменные Pella и нажми Перезапуск.<br>Бот начнёт заливать данные на GitHub каждые 30 мин.';
-      }
-      document.getElementById('bs-users').textContent = '0';
+      if(hint){hint.style.display='block';hint.innerHTML='⏳ users.json ещё не на GitHub.<br>Напиши боту /start и подожди 30 мин.';}
+      if(document.getElementById('bs-users')) document.getElementById('bs-users').textContent='0';
     }
-  } catch(e){
-    const hint2 = document.getElementById('bs-hint');
-    if(hint2){ hint2.style.display='block'; hint2.textContent='Нет подключения к GitHub.'; }
+  }catch(e){
+    if(hint){hint.style.display='block';hint.textContent='Ошибка загрузки подписчиков.';}
   }
+  
+  // Загружаем историю рассылок
+  loadBroadcastHistory();
 }
+
 
 async function loadBroadcastHistory(){
   const el = document.getElementById('bc-history');
@@ -1814,16 +1782,50 @@ function deletePromo(idx){
   showNotif('Промокод удалён');
 }
 
+// Читает публичные данные без токена
+async function loadPublicData(){
+  // Если есть токен - используем GitHub API (надёжнее)
+  if(getToken()){ await loadFromGitHub(); return; }
+  
+  // Без токена - читаем через raw.githubusercontent.com
+  const RAW='https://raw.githubusercontent.com/maratti-shop/maratti/main/';
+  let changed=false;
+  const map=[
+    ['products.json', d=>{ if(Array.isArray(d)&&d.length){ products=d; localStorage.setItem('maratti_products',JSON.stringify(d)); changed=true; }}],
+    ['orders.json',   d=>{ if(Array.isArray(d)){ orders=d; localStorage.setItem('maratti_orders',JSON.stringify(d)); changed=true; }}],
+    ['reviews.json',  d=>{ if(Array.isArray(d)){ reviews=d; localStorage.setItem('maratti_reviews',JSON.stringify(d)); changed=true; }}],
+    ['users.json',    d=>{ if(d) window._usersCache=d; }],
+  ];
+  await Promise.allSettled(map.map(async([file,handler])=>{
+    try{
+      const r=await fetch(RAW+file+'?t='+Date.now());
+      if(r.ok) handler(await r.json());
+    }catch(e){}
+  }));
+  if(changed){ renderDashboard(); renderProducts(); renderOrders(); showNotif('✅ Данные загружены!'); }
+  else { showNotif('⚠️ Введи GitHub Token в Настройках для полного доступа'); renderDashboard(); }
+}
+
 function init(){
+  // Загружаем из localStorage как начальное состояние
   products=JSON.parse(localStorage.getItem('maratti_products')||'[]');
   orders=JSON.parse(localStorage.getItem('maratti_orders')||'[]');
   reviews=JSON.parse(localStorage.getItem('maratti_reviews')||'[]');
   try{const pd=JSON.parse(localStorage.getItem('maratti_promos')||'{}');promos=pd.promos||[];promotion=pd.promotion||null;}catch(e){}
   categories=JSON.parse(localStorage.getItem('maratti_categories')||'[]');
+  
+  // Показываем что есть прямо сейчас
   renderDashboard(); renderProducts();
-  const t=getToken(); if(t) document.getElementById('s-token').value=t;
-  const bt=getBotToken(); if(bt && document.getElementById('s-bot-token')) document.getElementById('s-bot-token').value=bt;
-  if(getToken()){ loadFromGitHub(); loadCategories(); loadHeroSettings(); }
+  
+  // Заполняем токены в настройках
+  const t=getToken();
+  if(t && document.getElementById('s-token')) document.getElementById('s-token').value=t;
+  const bt=getBotToken();
+  if(bt && document.getElementById('s-bot-token')) document.getElementById('s-bot-token').value=bt;
+  
+  // Загружаем свежие данные с GitHub
+  loadPublicData();
+  if(getToken()){ loadCategories(); loadHeroSettings(); }
 }
 </script>
 </body>
