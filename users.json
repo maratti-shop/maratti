@@ -1,1 +1,53 @@
-{}
+{
+  "1258838821": {
+    "id": 1258838821,
+    "first_name": "ضوء",
+    "last_name": "",
+    "username": "hubridodo",
+    "joined": "05.06.2026 18:56",
+    "joined_iso": "2026-06-05T18:56:26.897731",
+    "last_seen": "05.06.2026 18:56",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
+  },
+  "1749766298": {
+    "id": 1749766298,
+    "first_name": "Ibrahim",
+    "last_name": "",
+    "username": "Ibragiiim1",
+    "joined": "05.06.2026 19:13",
+    "joined_iso": "2026-06-05T19:13:46.370155",
+    "last_seen": "05.06.2026 19:13",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
+  },
+  "5398041833": {
+    "id": 5398041833,
+    "first_name": "xxx",
+    "last_name": "xxx",
+    "username": "",
+    "joined": "05.06.2026 19:23",
+    "joined_iso": "2026-06-05T19:23:14.114227",
+    "last_seen": "05.06.2026 19:23",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
+  }
+}
