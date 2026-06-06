@@ -304,5 +304,22 @@
     "source": "organic",
     "funnel": {},
     "city": ""
+  },
+  "8621791575": {
+    "id": 8621791575,
+    "first_name": "David",
+    "last_name": "Fisher",
+    "username": "davidfisher_technik",
+    "joined": "06.06.2026 07:54",
+    "joined_iso": "2026-06-06T07:54:55.853270",
+    "last_seen": "06.06.2026 07:54",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
   }
 }
