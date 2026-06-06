@@ -372,5 +372,22 @@
     "source": "organic",
     "funnel": {},
     "city": ""
+  },
+  "5245332950": {
+    "id": 5245332950,
+    "first_name": "Раф",
+    "last_name": "",
+    "username": "Rafik3445",
+    "joined": "06.06.2026 13:30",
+    "joined_iso": "2026-06-06T13:30:37.722912",
+    "last_seen": "06.06.2026 13:30",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
   }
 }
