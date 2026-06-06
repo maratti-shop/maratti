@@ -202,5 +202,22 @@
     "source": "organic",
     "funnel": {},
     "city": ""
+  },
+  "414193183": {
+    "id": 414193183,
+    "first_name": "­",
+    "last_name": "",
+    "username": "Maarulla",
+    "joined": "06.06.2026 03:25",
+    "joined_iso": "2026-06-06T03:25:10.737115",
+    "last_seen": "06.06.2026 03:25",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
   }
 }
