@@ -1,14 +1,14 @@
 {
-  "starts": 18,
+  "starts": 19,
   "daily": {
     "2026-06-05": {
       "starts": 11,
       "new_users": 11
     },
     "2026-06-06": {
-      "starts": 7,
-      "new_users": 7
+      "starts": 8,
+      "new_users": 8
     }
   },
-  "new_users": 18
+  "new_users": 19
 }
