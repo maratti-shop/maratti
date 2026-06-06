@@ -270,5 +270,39 @@
     "source": "organic",
     "funnel": {},
     "city": ""
+  },
+  "2133238036": {
+    "id": 2133238036,
+    "first_name": "Мадина",
+    "last_name": "",
+    "username": "Madina_Uysupovna",
+    "joined": "06.06.2026 06:56",
+    "joined_iso": "2026-06-06T06:56:56.141011",
+    "last_seen": "06.06.2026 06:56",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
+  },
+  "7668367225": {
+    "id": 7668367225,
+    "first_name": "Юрий",
+    "last_name": "Техник",
+    "username": "yuranedura",
+    "joined": "06.06.2026 06:58",
+    "joined_iso": "2026-06-06T06:58:11.182779",
+    "last_seen": "06.06.2026 06:58",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
   }
 }
