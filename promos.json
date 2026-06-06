@@ -1,4 +1,12 @@
 {
-  "promos": [],
+  "promos": [
+    {
+      "code": "VIP1000",
+      "type": "fixed",
+      "value": 1000,
+      "until": "2026-06-09",
+      "active": true
+    }
+  ],
   "promotion": null
 }
