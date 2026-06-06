@@ -389,5 +389,22 @@
     "source": "organic",
     "funnel": {},
     "city": ""
+  },
+  "657060243": {
+    "id": 657060243,
+    "first_name": "Хабиб",
+    "last_name": "Орхаров",
+    "username": "Jlakec",
+    "joined": "06.06.2026 14:44",
+    "joined_iso": "2026-06-06T14:44:36.527539",
+    "last_seen": "06.06.2026 14:44",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
   }
 }
