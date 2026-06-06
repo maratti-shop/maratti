@@ -338,5 +338,22 @@
     "source": "organic",
     "funnel": {},
     "city": ""
+  },
+  "1013386320": {
+    "id": 1013386320,
+    "first_name": "Дмитрий",
+    "last_name": "Фомин",
+    "username": "Mitya2323",
+    "joined": "06.06.2026 11:15",
+    "joined_iso": "2026-06-06T11:15:43.851555",
+    "last_seen": "06.06.2026 11:15",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
   }
 }
