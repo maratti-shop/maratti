@@ -185,5 +185,22 @@
     "source": "organic",
     "funnel": {},
     "city": ""
+  },
+  "1299630008": {
+    "id": 1299630008,
+    "first_name": "Данила",
+    "last_name": "",
+    "username": "Zh_DA_7",
+    "joined": "06.06.2026 02:25",
+    "joined_iso": "2026-06-06T02:25:10.247365",
+    "last_seen": "06.06.2026 02:25",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
   }
 }
