@@ -321,5 +321,22 @@
     "source": "organic",
     "funnel": {},
     "city": ""
+  },
+  "323029217": {
+    "id": 323029217,
+    "first_name": "Обиджон",
+    "last_name": "",
+    "username": "goziev_11",
+    "joined": "06.06.2026 09:13",
+    "joined_iso": "2026-06-06T09:13:02.054559",
+    "last_seen": "06.06.2026 09:13",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
   }
 }
