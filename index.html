@@ -1021,7 +1021,8 @@ async function submitOrder(){
       }
     }
 
-    // Формируем объект заказа
+    // Сохраняем заказ — отправляем боту специальное сообщение
+    // Бот получит его и сохранит в orders.json на GitHub
     const orderData = {
       id:orderId,
       num:'#'+String(orderId).slice(-6),
@@ -1035,26 +1036,52 @@ async function submitOrder(){
       items:cart.map(i=>({name:i.name,color:i.color||'',size:i.size,price:i.price,art:i.art||''})),
       sum,deliveryCost:delCost,total
     };
-
-    // Отправляем JSON заказа боту — он сохранит в GitHub
+    // Сохраняем заказ — отправляем боту и сохраняем локально
     try {
-      await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{
+      // 1. Отправляем боту чтобы он сохранил на GitHub
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
           chat_id: parseInt(OWNER_ID),
-          text: 'NEW_ORDER:' + JSON.stringify(orderData)
+          text: '📦ORDER_DATA:' + JSON.stringify(orderData)
         })
       });
-    } catch(e){ console.log('order relay err', e); }
-
-    // Сохраняем в localStorage — покупатель видит заказ сразу
+    } catch(e){ console.log('order send err', e); }
+    
+    // 2. Сохраняем в localStorage для отображения в "Мои заказы"
     try {
-      const _saved = JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
-      _saved.unshift(orderData);
-      localStorage.setItem('my_orders_'+String(tgId), JSON.stringify(_saved.slice(0,50)));
+      const savedOrders = JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
+      savedOrders.unshift(orderData);
+      localStorage.setItem('my_orders_'+String(tgId), JSON.stringify(savedOrders.slice(0,50)));
     } catch(e){}
   } catch(e){ console.log('submit err',e); }
+
+  // Формируем и отправляем заказ боту → бот сохранит в GitHub
+  // Отправляем боту для сохранения в GitHub
+  try {
+    await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({chat_id:parseInt(OWNER_ID), text:'NEW_ORDER:'+JSON.stringify(orderData)})
+    });
+  } catch(e){ console.log('order err',e); }
+  // Сохраняем локально для "Мои заказы"
+  try {
+    const _s = JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
+    _s.unshift(orderData);
+    localStorage.setItem('my_orders_'+String(tgId), JSON.stringify(_s.slice(0,50)));
+  } catch(e){}
+
+
+    // Отправляем заказ боту → бот сохранит в GitHub
+  try{
+    await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:parseInt(OWNER_ID),text:'NEW_ORDER:'+JSON.stringify(orderData)})});
+  }catch(e){}
+  try{
+    const _s=JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
+    _s.unshift(orderData);
+    localStorage.setItem('my_orders_'+String(tgId),JSON.stringify(_s.slice(0,50)));
+  }catch(e){}
 
   // Сохраняем использованный промокод
   if(appliedPromo){
