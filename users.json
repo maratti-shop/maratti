@@ -423,5 +423,22 @@
     "source": "organic",
     "funnel": {},
     "city": ""
+  },
+  "442052480": {
+    "id": 442052480,
+    "first_name": "Эдуард",
+    "last_name": "Павлов",
+    "username": "",
+    "joined": "13.06.2026 11:58",
+    "joined_iso": "2026-06-13T11:58:34.520428",
+    "last_seen": "13.06.2026 11:58",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
   }
 }
