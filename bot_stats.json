@@ -15,9 +15,11 @@
     },
     "2026-06-13": {
       "starts": 2,
-      "new_users": 2
+      "new_users": 2,
+      "messages": 1
     }
   },
   "new_users": 27,
-  "promo_requests": 1
+  "promo_requests": 1,
+  "messages": 1
 }
