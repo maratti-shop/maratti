@@ -525,5 +525,39 @@
     "source": "organic",
     "funnel": {},
     "city": ""
+  },
+  "333621455": {
+    "id": 333621455,
+    "first_name": "Бахмуд",
+    "last_name": "",
+    "username": "Bahmudm",
+    "joined": "14.06.2026 14:52",
+    "joined_iso": "2026-06-14T14:52:33.633944",
+    "last_seen": "14.06.2026 14:52",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
+  },
+  "979099368": {
+    "id": 979099368,
+    "first_name": "Михаил",
+    "last_name": "",
+    "username": "belyy_nigga",
+    "joined": "14.06.2026 15:11",
+    "joined_iso": "2026-06-14T15:11:27.490248",
+    "last_seen": "14.06.2026 15:11",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
   }
 }
