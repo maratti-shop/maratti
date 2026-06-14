@@ -455,6 +455,27 @@ body{
     .my-order-total{font-size:16px;font-weight:700;color:var(--txt)}
     .my-order-track{font-size:12px;color:var(--emerald-bright);margin-top:6px;font-weight:600}
     .my-order-date{font-size:11px;color:var(--txt-4);margin-top:4px}
+    .order-success-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);z-index:99999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;padding:20px;overflow-y:auto}
+    .order-success-overlay.on{opacity:1}
+    .order-success-box{background:var(--surface,#fff);border-radius:28px;padding:36px 26px;max-width:360px;width:100%;text-align:center;transform:scale(.9);transition:transform .3s;box-shadow:0 20px 60px rgba(0,0,0,.3);margin:auto}
+    .order-success-overlay.on .order-success-box{transform:scale(1)}
+    .order-success-icon{width:68px;height:68px;margin:0 auto 18px;background:linear-gradient(135deg,#2a9670,#3db885);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;color:#fff}
+    .order-success-title{font-family:Georgia,serif;font-size:23px;font-weight:700;color:var(--text,#1a1a14);margin-bottom:6px}
+    .order-success-num{font-size:14px;font-weight:700;color:var(--gold,#c9a76a);margin-bottom:4px;letter-spacing:.05em}
+    .os-details{background:var(--bg2,#ede9e0);border-radius:14px;padding:14px;margin:16px 0 0;text-align:left}
+    .os-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px}
+    .os-row span{color:var(--text-m,#6b6558)}
+    .os-row b{color:var(--text,#1a1a14);font-weight:600;text-align:right;max-width:60%}
+    .os-items{margin:12px 0 0;text-align:left;background:var(--bg2,#ede9e0);border-radius:14px;padding:14px}
+    .os-item{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
+    .os-item-name{color:var(--text-s,#3d3a30);max-width:65%}
+    .os-item-price{color:var(--text,#1a1a14);font-weight:600}
+    .os-total{display:flex;justify-content:space-between;align-items:center;margin:14px 0 0;padding:14px 0 0;border-top:2px solid var(--border,#e8e3d8)}
+    .os-total span{font-size:15px;color:var(--text-m,#6b6558)}
+    .os-total b{font-size:22px;color:var(--gold,#c9a76a)}
+    .order-success-text{font-size:13px;color:var(--text-m,#6b6558);line-height:1.6;margin:18px 0 22px;padding:12px;background:rgba(42,150,112,.08);border-radius:12px}
+    .order-success-btn{width:100%;padding:15px;background:var(--text,#1a1a14);color:#fff;border:none;border-radius:100px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+    .order-success-btn:active{opacity:.85}
 </style>
 </head>
 
@@ -1007,6 +1028,9 @@ async function submitOrder(){
     sum, deliveryCost: delCost, promoDisc, total
   };
 
+  // Сохраняем копию корзины для отправки (cart очистится ниже)
+  const orderItems = [...cart];
+
   // СРАЗУ показываем покупателю подтверждение
   cart = [];
   appliedPromo = null;
@@ -1014,7 +1038,7 @@ async function submitOrder(){
   updateBadges();
   closeFo();
   btn.disabled=false; btn.textContent='Оформить заказ';
-  showOrderSuccess(orderData.num);
+  showOrderSuccess(orderData);
   goPage('home');
 
   // Сохраняем в localStorage для "Мои заказы"
@@ -1031,7 +1055,7 @@ async function submitOrder(){
     '📦 OZON: '+ozon+'\n'+
     '💬 '+tgUsername+'\n'+
     '🆔 '+tgId+'\n\n'+
-    '📦 Товары:\n'+cart.map(i=>'  • '+i.name+' р.'+i.size+(i.color?' ('+i.color+')':'')+' — '+fmt(i.price)+' ₽').join('\n')+'\n\n'+
+    '📦 Товары:\n'+orderItems.map(i=>'  • '+i.name+' р.'+i.size+(i.color?' ('+i.color+')':'')+' — '+fmt(i.price)+' ₽').join('\n')+'\n\n'+
     '📍 '+city+'\n'+addr+'\n'+
     '🚚 '+(delTypes[selDel_]||'OZON')+'\n'+
     (comment?'💬 '+comment+'\n':'')+
@@ -1042,7 +1066,7 @@ async function submitOrder(){
   // Отправляем уведомление владельцу с фото товаров
   try {
     // Сначала фото каждого товара
-    for(const item of cart){
+    for(const item of orderItems){
       if(item.photo){
         try {
           await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendPhoto',{
@@ -1065,7 +1089,7 @@ async function submitOrder(){
 
   // Сохраняем заказ напрямую в orders.json на GitHub
   try {
-    const _gh = atob('Z2hwX2ZxSlJ2azh1ak5KODRyaVdJZEttcm9ua2tKTExLcjNiU0RFZQ==');
+    const _gh = atob('Z2hwX0pjRXlZejFVWWhhdzNISGtuVEpIYVdHRGdXWW5mSDNhcnNBRQ==');
     const _r1 = await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/orders.json',{
       headers:{'Authorization':'Bearer '+_gh,'Accept':'application/vnd.github+json'},
       cache:'no-store'
@@ -1107,15 +1131,31 @@ async function submitOrder(){
 }
 
 // Модальное окно успешного заказа
-function showOrderSuccess(orderNum){
+function showOrderSuccess(order){
+  const itemsList = (order.items||[]).map(i=>
+    `<div class="os-item">
+      <span class="os-item-name">${i.name}${i.size?' · р.'+i.size:''}</span>
+      <span class="os-item-price">${fmt(i.price)} ₽</span>
+    </div>`).join('');
   const overlay = document.createElement('div');
   overlay.className = 'order-success-overlay';
   overlay.innerHTML = `
     <div class="order-success-box">
       <div class="order-success-icon">✓</div>
       <div class="order-success-title">Заказ оформлен!</div>
-      <div class="order-success-num">${orderNum}</div>
-      <div class="order-success-text">Спасибо за заказ! Мы свяжемся с вами в ближайшее время для подтверждения.</div>
+      <div class="order-success-num">${order.num}</div>
+      <div class="os-details">
+        <div class="os-row"><span>Получатель</span><b>${order.name} ${order.lastname}</b></div>
+        <div class="os-row"><span>Телефон</span><b>${order.phone}</b></div>
+        <div class="os-row"><span>Доставка</span><b>${order.deliveryType}</b></div>
+        <div class="os-row"><span>Город</span><b>${order.city}</b></div>
+      </div>
+      <div class="os-items">${itemsList}</div>
+      <div class="os-total">
+        <span>Итого</span>
+        <b>${fmt(order.total)} ₽</b>
+      </div>
+      <div class="order-success-text">📞 Мы свяжемся с вами в ближайшее время для подтверждения заказа и уточнения деталей доставки.</div>
       <button class="order-success-btn" onclick="this.closest('.order-success-overlay').remove()">Отлично</button>
     </div>`;
   document.body.appendChild(overlay);
