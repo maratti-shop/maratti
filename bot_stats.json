@@ -1,5 +1,5 @@
 {
-  "starts": 38,
+  "starts": 40,
   "daily": {
     "2026-06-05": {
       "starts": 11,
@@ -19,11 +19,11 @@
       "messages": 1
     },
     "2026-06-14": {
-      "starts": 3,
-      "new_users": 3
+      "starts": 5,
+      "new_users": 5
     }
   },
-  "new_users": 31,
+  "new_users": 33,
   "promo_requests": 1,
   "messages": 1
 }
