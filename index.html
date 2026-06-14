@@ -958,6 +958,7 @@ function renderCart(){
 // ── FORM ──
 function openForm(){
   if(!cart.length) return;
+  loadPromos(); // обновляем промокоды с GitHub
   const sum = cart.reduce((s,i)=>s+i.price,0);
   const del = sum>=5000?0:350;
   document.getElementById('fo-summary').innerHTML =
@@ -1201,7 +1202,7 @@ let appliedPromo = null;
 
 async function loadPromos(){
   try {
-    const r = await fetch(GITHUB_RAW+'promos.json?t='+Date.now());
+    const r = await fetch(GITHUB_RAW+'promos.json?nc='+Date.now()+Math.random(), {cache:'no-store'});
     const d = await r.json();
     PROMO_CODES = {};
     (d.promos||[]).forEach(p=>{
