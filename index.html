@@ -1003,7 +1003,7 @@ async function submitOrder(){
     tgUsername, tgId,
     deliveryType: delTypes[selDel_]||'OZON',
     city, address: addr, comment,
-    items: cart.map(i=>({name:i.name, color:i.color||'', size:i.size, price:i.price, art:i.art||''})),
+    items: cart.map(i=>({name:i.name, color:i.color||'', size:i.size, price:i.price, art:i.art||'', photo:i.photo||''})),
     sum, deliveryCost: delCost, promoDisc, total
   };
 
@@ -1022,8 +1022,24 @@ async function submitOrder(){
     '💳 Итого: '+fmt(total)+' ₽\n\n'+
     '⏰ '+new Date().toLocaleString('ru-RU');
 
-  // Отправляем уведомление владельцу
+  // Отправляем уведомление владельцу с фото товаров
   try {
+    // Сначала фото каждого товара
+    for(const item of cart){
+      if(item.photo){
+        try {
+          await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendPhoto',{
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+              chat_id: parseInt(OWNER_ID),
+              photo: item.photo,
+              caption: '👞 '+item.name+'\nЦвет: '+(item.color||'—')+'\nРазмер: '+item.size+'\nЦена: '+fmt(item.price)+' ₽'
+            })
+          });
+        } catch(e){}
+      }
+    }
+    // Потом текст заказа
     await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({chat_id: parseInt(OWNER_ID), text: msg})
@@ -1062,9 +1078,25 @@ async function submitOrder(){
   closeFo();
   btn.disabled=false; btn.textContent='Оформить заказ';
 
-  // Показываем подтверждение
-  showToast('✅ Заказ '+orderData.num+' оформлен! Мы свяжемся с вами.');
+  // Показываем красивое подтверждение
+  showOrderSuccess(orderData.num);
   goPage('home');
+}
+
+// Модальное окно успешного заказа
+function showOrderSuccess(orderNum){
+  const overlay = document.createElement('div');
+  overlay.className = 'order-success-overlay';
+  overlay.innerHTML = `
+    <div class="order-success-box">
+      <div class="order-success-icon">✓</div>
+      <div class="order-success-title">Заказ оформлен!</div>
+      <div class="order-success-num">${orderNum}</div>
+      <div class="order-success-text">Спасибо за заказ! Мы свяжемся с вами в ближайшее время для подтверждения.</div>
+      <button class="order-success-btn" onclick="this.closest('.order-success-overlay').remove()">Отлично</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>overlay.classList.add('on'), 10);
 }
 
 // ── NAVIGATION ──
