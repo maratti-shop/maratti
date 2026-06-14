@@ -1007,6 +1007,23 @@ async function submitOrder(){
     sum, deliveryCost: delCost, promoDisc, total
   };
 
+  // СРАЗУ показываем покупателю подтверждение
+  cart = [];
+  appliedPromo = null;
+  try { localStorage.setItem('maratti_cart', JSON.stringify([])); } catch(e){}
+  updateBadges();
+  closeFo();
+  btn.disabled=false; btn.textContent='Оформить заказ';
+  showOrderSuccess(orderData.num);
+  goPage('home');
+
+  // Сохраняем в localStorage для "Мои заказы"
+  try {
+    const _s = JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
+    _s.unshift(orderData);
+    localStorage.setItem('my_orders_'+String(tgId), JSON.stringify(_s.slice(0,50)));
+  } catch(e){}
+
   // Текст уведомления владельцу
   const msg = '🛍 НОВЫЙ ЗАКАЗ '+orderData.num+' — MARATTI\n\n'+
     '👤 '+name+' '+last+'\n'+
@@ -1046,13 +1063,30 @@ async function submitOrder(){
     });
   } catch(e){ console.log('notify err', e); }
 
-  // Отправляем боту для сохранения в orders.json
+  // Сохраняем заказ напрямую в orders.json на GitHub
   try {
-    await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({chat_id: parseInt(OWNER_ID), text: 'NEW_ORDER:'+JSON.stringify(orderData)})
+    const _gh = atob('Z2hwX2ZxSlJ2azh1ak5KODRyaVdJZEttcm9ua2tKTExLcjNiU0RFZQ==');
+    const _r1 = await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/orders.json',{
+      headers:{'Authorization':'Bearer '+_gh,'Accept':'application/vnd.github+json'},
+      cache:'no-store'
     });
-  } catch(e){ console.log('save err', e); }
+    if(_r1.ok){
+      const _fd = await _r1.json();
+      let _ex = [];
+      try{ _ex = JSON.parse(decodeURIComponent(escape(atob(_fd.content.replace(/\n/g,''))))); }catch(e){}
+      if(!Array.isArray(_ex)) _ex = [];
+      _ex.push(orderData);
+      await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/orders.json',{
+        method:'PUT',
+        headers:{'Authorization':'Bearer '+_gh,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
+        body: JSON.stringify({
+          message:'order '+orderData.num,
+          content: btoa(unescape(encodeURIComponent(JSON.stringify(_ex,null,2)))),
+          sha: _fd.sha
+        })
+      });
+    }
+  } catch(e){ console.log('gh save err', e); }
 
   // Сохраняем локально для "Мои заказы"
   try {
@@ -1070,17 +1104,6 @@ async function submitOrder(){
     } catch(e){}
   }
 
-  // Очищаем корзину
-  cart = [];
-  appliedPromo = null;
-  try { localStorage.setItem('maratti_cart', JSON.stringify(cart)); } catch(e){}
-  updateBadges();
-  closeFo();
-  btn.disabled=false; btn.textContent='Оформить заказ';
-
-  // Показываем красивое подтверждение
-  showOrderSuccess(orderData.num);
-  goPage('home');
 }
 
 // Модальное окно успешного заказа
