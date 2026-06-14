@@ -696,8 +696,8 @@ tg.ready(); tg.expand();
 
 const GITHUB_RAW = 'https://raw.githubusercontent.com/maratti-shop/maratti/main/';
 const _t1 = '8737124576';
-const _t2 = 'AAF45XAKXziRVl2sSSgHuU';
-const _t3 = 'o6Rtaio33JBs';
+const _t2 = 'AAEs0QYr9HM';
+const _t3 = 'y1v8ZsE1q46wslTS_UQDlms';
 const BOT_TOKEN = _t1 + ':' + _t2 + '-' + _t3;
 const OWNER_ID = '1258838821';
 const GITHUB_OWNER = 'maratti-shop';
@@ -888,9 +888,9 @@ function selSz(s,el){ selSize=s; document.querySelectorAll('.sz').forEach(x=>x.c
 
 // ── CART ──
 function addToCart(){
-  if(!selSize){ tg.showAlert('Выберите размер!'); return; }
+  if(!selSize){ showToast('Выберите размер!'); return; }
   const key = curProduct.id+'-'+selSize;
-  if(cart.find(i=>i.key===key)){ tg.showAlert('Уже в корзине!'); return; }
+  if(cart.find(i=>i.key===key)){ showToast('Уже в корзине!'); return; }
   cart.push({...curProduct, size:selSize, key});
   updateBadges(); renderCart();
   // Анимация полёта в корзину
@@ -972,14 +972,12 @@ async function submitOrder(){
   const city = document.getElementById('f-city').value.trim();
   const addr = document.getElementById('f-addr').value.trim();
   const comment = document.getElementById('f-comment').value.trim();
-  if(!name){ tg.showAlert('Введите имя'); return; }
-  if(!last){ tg.showAlert('Введите фамилию'); return; }
-  const phoneDigits = phone.replace(/\D/g,'');
-  if(phoneDigits.length < 11){ tg.showAlert('Введите полный номер телефона\n+7 (XXX) XXX-XX-XX'); return; }
-  const ozonDigits = ozon.replace(/\D/g,'');
-  if(ozonDigits.length < 11){ tg.showAlert('Введите полный номер телефона OZON\n+7 (XXX) XXX-XX-XX'); return; }
-  if(!city){ tg.showAlert('Введите город'); return; }
-  if(!addr){ tg.showAlert('Введите адрес'); return; }
+  if(!name){ showToast('Введите имя'); return; }
+  if(!last){ showToast('Введите фамилию'); return; }
+  if(phone.replace(/\D/g,'').length < 11){ showToast('Введите телефон'); return; }
+  if(ozon.replace(/\D/g,'').length < 11){ showToast('Введите телефон OZON'); return; }
+  if(!city){ showToast('Введите город'); return; }
+  if(!addr){ showToast('Введите адрес'); return; }
 
   const btn = document.getElementById('btn-submit');
   btn.disabled=true; btn.textContent='⏳ Отправляем...';
@@ -990,84 +988,56 @@ async function submitOrder(){
   const tgId = u?.id||'неизвестен';
   const sum = cart.reduce((s,i)=>s+i.price,0);
   const delCost = sum>=5000?0:350;
-  const promoDisc = appliedPromo ? (appliedPromo.type==='percent' ? Math.round(sum*appliedPromo.value/100) : Math.min(appliedPromo.value, sum)) : 0;
+  const promoDisc = appliedPromo ? (appliedPromo.type==='percent' ? Math.round(sum*appliedPromo.value/100) : appliedPromo.value) : 0;
   const total = sum + delCost - promoDisc;
-  const delTypes={ozon:'ПВЗ OZON',cdek:'ПВЗ СДЭК',courier:'Курьер'};
   const orderId = Date.now();
+  const delTypes = {ozon:'OZON', cdek:'СДЭК', post:'Почта России'};
 
-  const msg = `🛍 НОВЫЙ ЗАКАЗ #${String(orderId).slice(-6)} — MARATTI\n\n`+
-    `👤 ${name} ${last}\n📞 ${phone}\n📦 OZON: ${ozon}\n💬 ${tgUsername} (${tgName})\n🆔 ${tgId}\n\n`+
-    `📦 Товары:\n${cart.map(i=>`  • ${i.name}${i.color?' ('+i.color+')':''}, р.${i.size} — ${fmt(i.price)} ₽\n    🔖 Арт: ${i.art||'нет'}`).join('\n')}\n\n`+
-    `🚚 ${delTypes[selDel_]}\n🏙 ${city}\n📍 ${addr}\n${comment?'💬 '+comment+'\n':''}\n`+
-    `💰 ${fmt(sum)} ₽  🚚 ${delCost===0?'Бесплатно':fmt(delCost)+' ₽'}  💳 Итого: ${fmt(total)} ₽\n`+
-    `⏰ ${new Date().toLocaleString('ru-RU')}\n\n━━━━━━━━━━━━\nОтветить: ${tgUsername!=='нет'?tgUsername:'ID '+tgId}`;
+  // Формируем заказ
+  const orderData = {
+    id: orderId,
+    num: '#'+String(orderId).slice(-6),
+    date: new Date().toLocaleString('ru-RU'),
+    status: 'new',
+    name, lastname: last, phone, ozonPhone: ozon,
+    tgUsername, tgId,
+    deliveryType: delTypes[selDel_]||'OZON',
+    city, address: addr, comment,
+    items: cart.map(i=>({name:i.name, color:i.color||'', size:i.size, price:i.price, art:i.art||''})),
+    sum, deliveryCost: delCost, promoDisc, total
+  };
 
-  try {
-    // Отправляем текст заказа в Telegram
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({chat_id:parseInt(OWNER_ID), text:msg})
-    });
-    // Отправляем фото каждого товара если есть
-    for(const item of cart){
-      if(item.photo){
-        try {
-          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,{
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({
-              chat_id: parseInt(OWNER_ID),
-              photo: item.photo,
-              caption: `👞 ${item.name}\nЦвет: ${item.color||'—'}\nРазмер: ${item.size}\nАрт: ${item.art||'—'}\nЦена: ${fmt(item.price)} ₽`
-            })
-          });
-        } catch(e){ console.log('photo send err', e); }
-      }
-    }
+  // Текст уведомления владельцу
+  const msg = '🛍 НОВЫЙ ЗАКАЗ '+orderData.num+' — MARATTI\n\n'+
+    '👤 '+name+' '+last+'\n'+
+    '📞 '+phone+'\n'+
+    '📦 OZON: '+ozon+'\n'+
+    '💬 '+tgUsername+'\n'+
+    '🆔 '+tgId+'\n\n'+
+    '📦 Товары:\n'+cart.map(i=>'  • '+i.name+' р.'+i.size+(i.color?' ('+i.color+')':'')+' — '+fmt(i.price)+' ₽').join('\n')+'\n\n'+
+    '📍 '+city+'\n'+addr+'\n'+
+    '🚚 '+(delTypes[selDel_]||'OZON')+'\n'+
+    (comment?'💬 '+comment+'\n':'')+
+    (appliedPromo?'🎁 Промокод: -'+fmt(promoDisc)+' ₽\n':'')+
+    '💳 Итого: '+fmt(total)+' ₽\n\n'+
+    '⏰ '+new Date().toLocaleString('ru-RU');
 
-    // Сохраняем заказ — отправляем боту специальное сообщение
-    // Бот получит его и сохранит в orders.json на GitHub
-    const orderData = {
-      id:orderId,
-      num:'#'+String(orderId).slice(-6),
-      date:new Date().toLocaleString('ru-RU'),
-      status:'new',
-      name,lastname:last,phone,
-      ozonPhone:ozon,
-      tgUsername,tgId,
-      deliveryType:delTypes[selDel_],
-      city,address:addr,comment,
-      items:cart.map(i=>({name:i.name,color:i.color||'',size:i.size,price:i.price,art:i.art||''})),
-      sum,deliveryCost:delCost,total
-    };
-    // Сохраняем заказ — отправляем боту и сохраняем локально
-    try {
-      // 1. Отправляем боту чтобы он сохранил на GitHub
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          chat_id: parseInt(OWNER_ID),
-          text: '📦ORDER_DATA:' + JSON.stringify(orderData)
-        })
-      });
-    } catch(e){ console.log('order send err', e); }
-    
-    // 2. Сохраняем в localStorage для отображения в "Мои заказы"
-    try {
-      const savedOrders = JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
-      savedOrders.unshift(orderData);
-      localStorage.setItem('my_orders_'+String(tgId), JSON.stringify(savedOrders.slice(0,50)));
-    } catch(e){}
-  } catch(e){ console.log('submit err',e); }
-
-  // Формируем и отправляем заказ боту → бот сохранит в GitHub
-  // Отправляем боту для сохранения в GitHub
+  // Отправляем уведомление владельцу
   try {
     await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({chat_id:parseInt(OWNER_ID), text:'NEW_ORDER:'+JSON.stringify(orderData)})
+      body: JSON.stringify({chat_id: parseInt(OWNER_ID), text: msg})
     });
-  } catch(e){ console.log('order err',e); }
+  } catch(e){ console.log('notify err', e); }
+
+  // Отправляем боту для сохранения в orders.json
+  try {
+    await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({chat_id: parseInt(OWNER_ID), text: 'NEW_ORDER:'+JSON.stringify(orderData)})
+    });
+  } catch(e){ console.log('save err', e); }
+
   // Сохраняем локально для "Мои заказы"
   try {
     const _s = JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
@@ -1075,35 +1045,26 @@ async function submitOrder(){
     localStorage.setItem('my_orders_'+String(tgId), JSON.stringify(_s.slice(0,50)));
   } catch(e){}
 
-
-    // Отправляем заказ боту → бот сохранит в GitHub
-  try{
-    await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:parseInt(OWNER_ID),text:'NEW_ORDER:'+JSON.stringify(orderData)})});
-  }catch(e){}
-  try{
-    const _s=JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
-    _s.unshift(orderData);
-    localStorage.setItem('my_orders_'+String(tgId),JSON.stringify(_s.slice(0,50)));
-  }catch(e){}
-
-  // Сохраняем использованный промокод
+  // Сохраняем промокод
   if(appliedPromo){
-    const used = JSON.parse(localStorage.getItem('used_promos')||'[]');
-    if(!used.includes(appliedPromo.code)){ used.push(appliedPromo.code); localStorage.setItem('used_promos',JSON.stringify(used)); }
+    try {
+      const used = JSON.parse(localStorage.getItem('used_promos')||'[]');
+      used.push(appliedPromo.code);
+      localStorage.setItem('used_promos', JSON.stringify(used));
+    } catch(e){}
   }
-  appliedPromo=null;
-  document.getElementById('promo-input').value='';
-  const pr=document.getElementById('promo-result'); if(pr){ pr.style.display='none'; }
-  const cart_items = cart.map(i=>`• ${i.name} (${i.color||''}), р.${i.size} — ${fmt(i.price)} ₽`).join('\n');
-  cart=[]; updateBadges(); renderCart(); closeFo(); goPage('home');
-  btn.disabled=false; btn.textContent='✅ Подтвердить заказ';
-  const confirmMsg =
-    '✅ Заказ #'+String(orderId).slice(-6)+' оформлен!\n\n'+
-    cart_items+'\n\n'+
-    '💳 Итого: '+fmt(total)+' ₽\n\n'+
-    '📞 Менеджер свяжется с вами по номеру '+phone+' для подтверждения и оплаты.\n\n'+
-    'С уважением, MARATTI 🖤';
-  setTimeout(()=>tg.showAlert(confirmMsg), 300);
+
+  // Очищаем корзину
+  cart = [];
+  appliedPromo = null;
+  try { localStorage.setItem('maratti_cart', JSON.stringify(cart)); } catch(e){}
+  updateBadges();
+  closeFo();
+  btn.disabled=false; btn.textContent='Оформить заказ';
+
+  // Показываем подтверждение
+  showToast('✅ Заказ '+orderData.num+' оформлен! Мы свяжемся с вами.');
+  goPage('home');
 }
 
 // ── NAVIGATION ──
@@ -1240,8 +1201,8 @@ function shareProduct(id){
   } else {
     // Копируем в буфер
     navigator.clipboard?.writeText('https://t.me/maratti_shop_bot').then(()=>{
-      tg.showAlert('Ссылка скопирована!\n\nОтправь другу: https://t.me/maratti_shop_bot');
-    }).catch(()=>tg.showAlert('Поделись ботом: @maratti_shop_bot'));
+      showToast('Ссылка скопирована!\n\nОтправь другу: https://t.me/maratti_shop_bot');
+    }).catch(()=>showToast('Поделись ботом: @maratti_shop_bot'));
   }
 }
 
@@ -1351,9 +1312,9 @@ function selectStar(n){
 }
 
 async function submitReview(productId){
-  if(!selectedStar){ tg.showAlert('Поставьте оценку!'); return; }
+  if(!selectedStar){ showToast('Поставьте оценку!'); return; }
   const text = (document.getElementById('review-text').value||'').trim();
-  if(!text){ tg.showAlert('Напишите отзыв!'); return; }
+  if(!text){ showToast('Напишите отзыв!'); return; }
 
   const u = tg.initDataUnsafe?.user;
   const name = u ? (u.first_name||'Покупатель') : 'Покупатель';
@@ -1434,7 +1395,7 @@ function quickAdd(id){
   const p = PRODUCTS.find(x=>String(x.id)===id);
   if(!p) return;
   const sizes = p.sizes||[];
-  if(!sizes.length){ tg.showAlert('Нет доступных размеров'); return; }
+  if(!sizes.length){ showToast('Нет доступных размеров'); return; }
   // Открываем карточку чтобы выбрать размер
   openProduct(id);
   showToast('Выберите размер');
