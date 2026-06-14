@@ -491,5 +491,22 @@
     "source": "organic",
     "funnel": {},
     "city": ""
+  },
+  "461455011": {
+    "id": 461455011,
+    "first_name": "Vladislav",
+    "last_name": "",
+    "username": "vladosik_db",
+    "joined": "14.06.2026 08:10",
+    "joined_iso": "2026-06-14T08:10:19.873071",
+    "last_seen": "14.06.2026 08:10",
+    "orders": 0,
+    "total_spent": 0,
+    "blocked": false,
+    "ref_by": "",
+    "ref_count": 0,
+    "source": "organic",
+    "funnel": {},
+    "city": ""
   }
 }
