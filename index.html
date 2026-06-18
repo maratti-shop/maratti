@@ -727,7 +727,7 @@ const GITHUB_REPO = 'maratti';
 let PRODUCTS = [];
 let activeCat = 'all';
 let favorites = JSON.parse(localStorage.getItem('maratti_favorites')||'[]').map(String);
-let cart = [];
+let cart = (function(){ try{ return JSON.parse(localStorage.getItem('maratti_cart')||'[]'); }catch(e){ return []; } })();
 let selSize = null;
 let curProduct = null;
 let selDel_ = 'ozon';
@@ -1169,6 +1169,9 @@ function updateBadges(){
   const cb=document.getElementById('cb'), fb=document.getElementById('fb');
   if(cb){ if(cart.length){cb.style.display='flex';cb.textContent=cart.length;}else{cb.style.display='none';} }
   if(fb){ if(favorites.length){fb.style.display='flex';fb.textContent=favorites.length;}else{fb.style.display='none';} }
+  // Сохраняем корзину и избранное
+  try { localStorage.setItem('maratti_cart', JSON.stringify(cart)); } catch(e){}
+  try { localStorage.setItem('maratti_favorites', JSON.stringify(favorites)); } catch(e){}
 }
 
 // ── PROMO ──
@@ -1209,7 +1212,19 @@ function updatePromoStory(){
 
 function showPromotion(){
   if(PROMOTION && PROMOTION.active && PROMOTION.text){
-    showToast(PROMOTION.text);
+    const overlay = document.createElement('div');
+    overlay.className = 'promo-modal-overlay';
+    overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+    overlay.innerHTML = `
+      <div class="promo-modal-box">
+        <button class="promo-modal-close" onclick="this.closest('.promo-modal-overlay').remove()">✕</button>
+        <div class="promo-modal-icon">🎁</div>
+        <div class="promo-modal-title">${PROMOTION.title||'Акция'}</div>
+        <div class="promo-modal-text">${(PROMOTION.text||'').replace(/\n/g,'<br>')}</div>
+        <button class="promo-modal-btn" onclick="this.closest('.promo-modal-overlay').remove();goPage('catalog')">В каталог</button>
+      </div>`;
+    document.body.appendChild(overlay);
+    setTimeout(()=>overlay.classList.add('on'),10);
   } else {
     showToast('Следите за акциями MARATTI');
   }
