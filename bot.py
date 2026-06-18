@@ -1079,7 +1079,37 @@ async def sync_job(ctx: ContextTypes.DEFAULT_TYPE):
     """Периодическая синхронизация данных на GitHub"""
     await sync_to_github()
 
+async def sync_all_from_github():
+    """Загружает users.json, bot_stats.json, broadcasts.json с GitHub при старте
+    чтобы не потерять данные при перезапуске бота на Bothost"""
+    if not GH_TOKEN:
+        return
+    for fname, saver in [
+        (USERS_FILE, save_users),
+        (ORDERS_FILE, save_orders),
+    ]:
+        try:
+            data, _ = await gh_get_file(fname)
+            if data is not None:
+                save_json(fname, data)
+                n = len(data) if isinstance(data,(list,dict)) else 0
+                logger.info(f'Loaded {fname} from GitHub: {n} records')
+        except Exception as e:
+            logger.warning(f'sync_all {fname}: {e}')
+    # bot_stats и broadcasts грузим как есть
+    for fname in [STATS_FILE, BROADCASTS_FILE]:
+        try:
+            data, _ = await gh_get_file(fname)
+            if data is not None:
+                save_json(fname, data)
+                logger.info(f'Loaded {fname} from GitHub')
+        except Exception as e:
+            logger.warning(f'sync_all {fname}: {e}')
+
+
 async def post_init(app: Application):
+    # ВАЖНО: загружаем данные с GitHub чтобы не потерять при перезапуске
+    await sync_all_from_github()
     # Команды для обычных пользователей
     await app.bot.set_my_commands([
         BotCommand('start',  '🏠 Главное меню'),
