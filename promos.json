@@ -6,6 +6,13 @@
       "value": 500,
       "until": "2026-06-21",
       "active": true
+    },
+    {
+      "code": "ТЕСТ",
+      "type": "fixed",
+      "value": 100000,
+      "until": "",
+      "active": true
     }
   ],
   "promotion": {
