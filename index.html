@@ -1088,37 +1088,13 @@ async function submitOrder(){
     });
   } catch(e){ console.log('notify err', e); }
 
-  // Сохраняем заказ напрямую в orders.json на GitHub
+  // Отправляем заказ боту — он сохранит в GitHub (токен у бота безопасный)
   try {
-    const _gh = atob('Z2hwX2Y0VXFYTXZqUFdNNU1OWGpic0FJZFNsN3lLY0ZaTTNxY3hQcw==');
-    const _r1 = await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/orders.json',{
-      headers:{'Authorization':'Bearer '+_gh,'Accept':'application/vnd.github+json'},
-      cache:'no-store'
+    await fetch('https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({chat_id: parseInt(OWNER_ID), text: 'SAVE_ORDER:'+JSON.stringify(orderData)})
     });
-    if(_r1.ok){
-      const _fd = await _r1.json();
-      let _ex = [];
-      try{ _ex = JSON.parse(decodeURIComponent(escape(atob(_fd.content.replace(/\n/g,''))))); }catch(e){}
-      if(!Array.isArray(_ex)) _ex = [];
-      _ex.push(orderData);
-      await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/orders.json',{
-        method:'PUT',
-        headers:{'Authorization':'Bearer '+_gh,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
-        body: JSON.stringify({
-          message:'order '+orderData.num,
-          content: btoa(unescape(encodeURIComponent(JSON.stringify(_ex,null,2)))),
-          sha: _fd.sha
-        })
-      });
-    }
-  } catch(e){ console.log('gh save err', e); }
-
-  // Сохраняем локально для "Мои заказы"
-  try {
-    const _s = JSON.parse(localStorage.getItem('my_orders_'+String(tgId))||'[]');
-    _s.unshift(orderData);
-    localStorage.setItem('my_orders_'+String(tgId), JSON.stringify(_s.slice(0,50)));
-  } catch(e){}
+  } catch(e){ console.log('save relay err', e); }
 
   // Сохраняем промокод
   if(appliedPromo){
