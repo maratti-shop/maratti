@@ -432,5 +432,43 @@
     "reviews": 0,
     "active": true,
     "id": 1780687414950
+  },
+  {
+    "name": "Шлепанцы кожаные летние",
+    "cat": "tapochki",
+    "catName": "tapochki",
+    "color": "Темно-синий",
+    "material": "Натуральная кожа",
+    "price": 3300,
+    "old": 8600,
+    "wb": 4100,
+    "disc": 62,
+    "sizes": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48
+    ],
+    "art": "399681649",
+    "photo": "https://basket-23.wbbasket.ru/vol3996/part399681/399681649/images/big/1.webp",
+    "photos": [
+      "https://basket-23.wbbasket.ru/vol3996/part399681/399681649/images/big/1.webp",
+      "https://basket-23.wbbasket.ru/vol3996/part399681/399681649/images/big/6.webp",
+      "https://basket-23.wbbasket.ru/vol3996/part399681/399681649/images/big/3.webp",
+      "https://basket-23.wbbasket.ru/vol3996/part399681/399681649/images/big/5.webp",
+      "https://basket-23.wbbasket.ru/vol3996/part399681/399681649/images/big/4.webp",
+      "https://basket-23.wbbasket.ru/vol3996/part399681/399681649/images/big/7.webp",
+      "https://basket-23.wbbasket.ru/vol3996/part399681/399681649/images/big/9.webp"
+    ],
+    "desc": "",
+    "rating": 4.7,
+    "reviews": 0,
+    "active": true,
+    "id": 1781819733323
   }
 ]
