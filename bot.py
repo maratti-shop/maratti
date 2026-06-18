@@ -479,10 +479,11 @@ async def handle_text(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     text = update.message.text or ''
 
     # Обработка заказа — новый формат NEW_ORDER
-    if text.startswith('NEW_ORDER:'):
+    if text.startswith('NEW_ORDER:') or text.startswith('SAVE_ORDER:'):
         try:
             import json as _j
-            order = _j.loads(text[len('NEW_ORDER:'):])
+            prefix = 'SAVE_ORDER:' if text.startswith('SAVE_ORDER:') else 'NEW_ORDER:'
+            order = _j.loads(text[len(prefix):])
             await sync_orders_from_github()
             orders = load_orders()
             ids = [str(o.get('id','')) for o in orders]
