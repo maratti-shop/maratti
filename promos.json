@@ -12,7 +12,7 @@
       "type": "fixed",
       "value": 100000,
       "until": "",
-      "active": true
+      "active": false
     }
   ],
   "promotion": {
