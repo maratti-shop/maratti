@@ -633,7 +633,7 @@
 <div class="notif" id="notif"></div>
 
 <script>
-const DEFAULT_PWD = 'maratti2006';
+const DEFAULT_PWD = '2410260779';
 const GITHUB_OWNER = 'maratti-shop';
 const GITHUB_REPO = 'maratti';
 const GH_API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/`;
@@ -879,12 +879,31 @@ function toggleProduct(id,active){
   if(p){ p.active=active; save(); saveToGitHub(); showNotif(active?'✅ Показан':'👁 Скрыт'); }
 }
 
+function fillCategorySelect(selected){
+  const sel = document.getElementById('p-cat');
+  if(!sel) return;
+  // Дефолтные категории + добавленные из админки
+  const defaults = [
+    {id:'loafers',name:'Лоферы'},
+    {id:'shoes',name:'Туфли'},
+    {id:'sneakers',name:'Кеды'},
+    {id:'boots',name:'Ботинки'}
+  ];
+  // Объединяем: сначала добавленные категории, потом дефолтные (без дублей по id)
+  const all = [...categories];
+  defaults.forEach(d=>{ if(!all.some(c=>c.id===d.id)) all.push(d); });
+  sel.innerHTML = all.map(c=>
+    `<option value="${c.id}">${c.emoji?c.emoji+' ':''}${c.name}</option>`
+  ).join('');
+  if(selected) sel.value = selected;
+}
+
 function openAddProduct(){
   document.getElementById('mo-p-title').textContent='Добавить товар';
   document.getElementById('edit-id').value='';
   ['p-name','p-color','p-material','p-price','p-old','p-wb','p-art','p-photo','p-desc','p-rating'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('p-sizes').value='40, 41, 42, 43, 44, 45';
-  document.getElementById('p-cat').value='loafers';
+  fillCategorySelect();
   document.getElementById('p-active').checked=true;
   document.getElementById('mo-product').classList.add('on');
 }
@@ -894,7 +913,7 @@ function openEditProduct(id){
   document.getElementById('mo-p-title').textContent='Редактировать товар';
   document.getElementById('edit-id').value=id;
   document.getElementById('p-name').value=p.name||'';
-  document.getElementById('p-cat').value=p.cat||'loafers';
+  fillCategorySelect(p.cat||'loafers');
   document.getElementById('p-color').value=p.color||'';
   document.getElementById('p-material').value=p.material||'';
   document.getElementById('p-price').value=p.price||'';
