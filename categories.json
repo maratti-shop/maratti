@@ -5,11 +5,6 @@
     "emoji": "👞"
   },
   {
-    "id": "shoes",
-    "name": "Туфли",
-    "emoji": "👞"
-  },
-  {
     "id": "tapochki",
     "name": "Тапочки",
     "emoji": "🩴"
@@ -18,5 +13,10 @@
     "id": "sneakers",
     "name": "Кеды",
     "emoji": "👟"
+  },
+  {
+    "id": "shoes",
+    "name": "Туфли",
+    "emoji": "👞"
   }
 ]
