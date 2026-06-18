@@ -13,5 +13,10 @@
     "id": "sneakers",
     "name": "Кеды",
     "emoji": "👟"
+  },
+  {
+    "id": "tapochki",
+    "name": "Тапочки",
+    "emoji": "🩴"
   }
 ]
