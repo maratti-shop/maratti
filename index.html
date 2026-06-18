@@ -1090,7 +1090,7 @@ async function submitOrder(){
 
   // Сохраняем заказ напрямую в orders.json на GitHub
   try {
-    const _gh = atob('Z2hwX2cwZE5rRElXNXZ2N0NIa0dQVlR1VFNWSWJYeEZqazE0UGtkTw==');
+    const _gh = atob('Z2hwX2d2SHpuUFpZMXFJYmdEVFBKcU15RFdoMXE0amI4cjFXWVR0VA==');
     const _r1 = await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/orders.json',{
       headers:{'Authorization':'Bearer '+_gh,'Accept':'application/vnd.github+json'},
       cache:'no-store'

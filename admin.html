@@ -646,7 +646,7 @@ let orders = [];
 let currentOrderId = null;
 
 function fmt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '); }
-function getToken(){ const saved=localStorage.getItem('gh_token'); return (saved && saved.startsWith('ghp_'))?saved:atob('Z2hwX2cwZE5rRElXNXZ2N0NIa0dQVlR1VFNWSWJYeEZqazE0UGtkTw=='); }
+function getToken(){ const saved=localStorage.getItem('gh_token'); return (saved && saved.startsWith('ghp_'))?saved:atob('Z2hwX2d2SHpuUFpZMXFJYmdEVFBKcU15RFdoMXE0amI4cjFXWVR0VA=='); }
 function getPwd(){ return localStorage.getItem('admin_pwd')||DEFAULT_PWD; }
 function save(){ localStorage.setItem('maratti_products',JSON.stringify(products)); }
 function saveOrders(){ localStorage.setItem('maratti_orders',JSON.stringify(orders)); }
